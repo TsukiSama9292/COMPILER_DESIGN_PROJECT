@@ -1,0 +1,17 @@
+x-default-opts: &default-opts
+  restart: always
+  tty: true
+  stdin_open: true
+  privileged: false
+  ipc: private
+  
+services:
+  # CONTAINER
+  compiler_container:
+    <<: *default-opts
+    build:
+      context: .
+      dockerfile: dockerfile
+    hostname: b1143015
+    volumes:
+      - ./app:/app
