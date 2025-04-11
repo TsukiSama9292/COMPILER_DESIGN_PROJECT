@@ -1870,18 +1870,18 @@ void yyfree (void * ptr )
 
 void print_summary() {
     printf("\n========== 詞彙統整表 ==========\n");
-    printf("| 類型         | 出現次數 |\n");
-    printf("|--------------|----------|\n");
-    printf("| KEYWORD      | %d        |\n", count_keyword);
-    printf("| BOOLEAN      | %d        |\n", count_boolean);
-    printf("| NONE         | %d        |\n", count_none);
-    printf("| FLOAT        | %d        |\n", count_float);
-    printf("| INTEGER      | %d        |\n", count_integer);
-    printf("| STRING       | %d        |\n", count_string);
-    printf("| IDENTIFIER   | %d        |\n", count_identifier);
-    printf("| OPERATOR     | %d        |\n", count_operator);
-    printf("| SYMBOL       | %d        |\n", count_symbol);
-    printf("| UNKNOWN      | %d        |\n", count_unknown);
+    printf("| Type         | Times\t|\n");
+    printf("|--------------|--------|\n");
+    printf("| KEYWORD      | %d\t|\n", count_keyword);
+    printf("| BOOLEAN      | %d\t|\n", count_boolean);
+    printf("| NONE         | %d\t|\n", count_none);
+    printf("| FLOAT        | %d\t|\n", count_float);
+    printf("| INTEGER      | %d\t|\n", count_integer);
+    printf("| STRING       | %d\t|\n", count_string);
+    printf("| IDENTIFIER   | %d\t|\n", count_identifier);
+    printf("| OPERATOR     | %d\t|\n", count_operator);
+    printf("| SYMBOL       | %d\t|\n", count_symbol);
+    printf("| UNKNOWN      | %d\t|\n", count_unknown);
     printf("================================\n");
 }
 
