@@ -16,6 +16,7 @@ int count_unknown = 0;
 void print_summary();
 %}
 
+
 %%
 "def"|"if"|"else"|"return"     { count_keyword++;   printf("<KEYWORD: %s>\n", yytext); }
 "True"|"False"                 { count_boolean++;   printf("<BOOLEAN: %s>\n", yytext); }
@@ -30,8 +31,7 @@ void print_summary();
 [a-zA-Z_][a-zA-Z0-9_]*         { count_identifier++;printf("<IDENTIFIER: %s>\n", yytext); }
 
 "->"|"=="|">="|"<="|"!="       { count_operator++;  printf("<OPERATOR: %s>\n", yytext); }
-[=:\-,\.\#><\+\*/%]            { count_symbol++;    printf("<SYMBOL: %s>\n", yytext); }  // 注意：\+ 處理 + 符號
-[();]                          { count_symbol++;    printf("<SYMBOL: %s>\n", yytext); }  // 將分號加入符號集
+[=:\-,\.\#><\+\*/%]            { count_symbol++;    printf("<SYMBOL: %s>\n", yytext); }
 [()]                           { count_symbol++;    printf("<SYMBOL: %s>\n", yytext); }
 [\[\]]                         { count_symbol++;    printf("<SYMBOL: %s>\n", yytext); }
 [{}]                           { count_symbol++;    printf("<SYMBOL: %s>\n", yytext); }
@@ -60,6 +60,6 @@ void print_summary() {
 
 int main(int argc, char **argv) {
     yylex();
-    print_summary();
+    print_summary();    
     return 0;
 }
