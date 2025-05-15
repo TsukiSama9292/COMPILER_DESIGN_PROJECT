@@ -41,8 +41,9 @@ gcc translate.tab.c lex.yy.c -lfl
 ./a.out < test.py
 ```
 ```bash
-bison -d translate.y # 產生 translate.tab.h 與 translate.tab.c
+bison -d translate.y
 flex lex.l
-gcc translate.tab.c lex.yy.c -lfl # 產生 a.out
-./a.out < test.c
+gcc translate.tab.c lex.yy.c -lfl -o parser
+./parser < test.c
+./parser < test_error.c
 ```

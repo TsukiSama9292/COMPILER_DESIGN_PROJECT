@@ -58,36 +58,37 @@ extern int yydebug;
     STRING_LITERAL = 259,          /* STRING_LITERAL  */
     NUMBER = 260,                  /* NUMBER  */
     FLOAT = 261,                   /* FLOAT  */
-    INT = 262,                     /* INT  */
-    RETURN = 263,                  /* RETURN  */
-    IF = 264,                      /* IF  */
-    ELSE = 265,                    /* ELSE  */
-    FOR = 266,                     /* FOR  */
-    WHILE = 267,                   /* WHILE  */
-    PRINTF = 268,                  /* PRINTF  */
-    EQ = 269,                      /* EQ  */
-    NEQ = 270,                     /* NEQ  */
-    GE = 271,                      /* GE  */
-    LE = 272,                      /* LE  */
-    GT = 273,                      /* GT  */
-    LT = 274,                      /* LT  */
-    ASSIGN = 275,                  /* ASSIGN  */
-    PLUS = 276,                    /* PLUS  */
-    MINUS = 277,                   /* MINUS  */
-    MULT = 278,                    /* MULT  */
-    DIV = 279,                     /* DIV  */
-    INC = 280,                     /* INC  */
-    DEC = 281,                     /* DEC  */
-    DOT = 282,                     /* DOT  */
-    SEMICOLON = 283,               /* SEMICOLON  */
-    COMMA = 284,                   /* COMMA  */
-    LPAREN = 285,                  /* LPAREN  */
-    RPAREN = 286,                  /* RPAREN  */
-    LBRACE = 287,                  /* LBRACE  */
-    RBRACE = 288,                  /* RBRACE  */
-    LBRACKET = 289,                /* LBRACKET  */
-    RBRACKET = 290,                /* RBRACKET  */
-    LOWER_THAN_ELSE = 291          /* LOWER_THAN_ELSE  */
+    SIZEOF = 262,                  /* SIZEOF  */
+    INT = 263,                     /* INT  */
+    RETURN = 264,                  /* RETURN  */
+    IF = 265,                      /* IF  */
+    ELSE = 266,                    /* ELSE  */
+    FOR = 267,                     /* FOR  */
+    WHILE = 268,                   /* WHILE  */
+    PRINTF = 269,                  /* PRINTF  */
+    EQ = 270,                      /* EQ  */
+    NEQ = 271,                     /* NEQ  */
+    GE = 272,                      /* GE  */
+    LE = 273,                      /* LE  */
+    GT = 274,                      /* GT  */
+    LT = 275,                      /* LT  */
+    ASSIGN = 276,                  /* ASSIGN  */
+    PLUS = 277,                    /* PLUS  */
+    MINUS = 278,                   /* MINUS  */
+    MULT = 279,                    /* MULT  */
+    DIV = 280,                     /* DIV  */
+    INC = 281,                     /* INC  */
+    DEC = 282,                     /* DEC  */
+    DOT = 283,                     /* DOT  */
+    SEMICOLON = 284,               /* SEMICOLON  */
+    COMMA = 285,                   /* COMMA  */
+    LPAREN = 286,                  /* LPAREN  */
+    RPAREN = 287,                  /* RPAREN  */
+    LBRACE = 288,                  /* LBRACE  */
+    RBRACE = 289,                  /* RBRACE  */
+    LBRACKET = 290,                /* LBRACKET  */
+    RBRACKET = 291,                /* RBRACKET  */
+    LOWER_THAN_ELSE = 292          /* LOWER_THAN_ELSE  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -96,12 +97,12 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 12 "translate.y"
+#line 11 "translate.y"
 
     int num;
     char *str;
 
-#line 105 "translate.tab.h"
+#line 106 "translate.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
