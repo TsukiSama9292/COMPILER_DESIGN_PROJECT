@@ -3,7 +3,7 @@ int main() {
     int i;
     int pass = 0;
     int fail = 0;
-    int size = 10;
+    int size = 10
     printf("Student Scores and Results:\n");
     for (i = 0; i < size; i++) {
         if (scores[i] >= 60) {
