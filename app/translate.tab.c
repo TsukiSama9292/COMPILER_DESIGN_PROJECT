@@ -1716,12 +1716,21 @@ yyreturnlab:
 
 
 void yyerror(const char *s) {
-    int report_line = yylineno > 0 ? yylineno - 1 : 0;
+    int report_line = yylineno;
+    if (report_line > 0 && report_line <= total_lines) {
+        // 嘗試往下找實際錯誤行
+        while (report_line < total_lines &&
+               source_lines[report_line] &&
+               strlen(source_lines[report_line]) <= 1) {
+            report_line++;
+        }
+    }
     fprintf(stderr, "❌ 語法錯誤：%s 在第 %d 行 \n", s, report_line);
     if (report_line > 0 && report_line <= total_lines) {
-        fprintf(stderr, "錯誤程式碼：%s", source_lines[report_line-1]);
+        fprintf(stderr, "錯誤程式碼：%s", source_lines[report_line - 1]);
     }
 }
+
 int main(int argc, char **argv) {
     // 讀取所有輸入並儲存至 source_lines
     char buf[1024];
