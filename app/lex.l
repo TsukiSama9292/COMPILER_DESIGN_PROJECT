@@ -12,7 +12,7 @@ extern int yylineno;
 "else"              { return ELSE; }
 "for"               { return FOR; }
 "while"             { return WHILE; }
-"printf"            { return PRINTF; }
+"sizeof"            { return SIZEOF; }
 
 "=="                { return EQ; }
 "!="                { return NEQ; }
@@ -28,7 +28,6 @@ extern int yylineno;
 "-"                 { return MINUS; }
 "*"                 { return MULT; }
 "/"                 { return DIV; }
-"."                 { return DOT; }
 
 ";"                 { return SEMICOLON; }
 ","                 { return COMMA; }
@@ -38,20 +37,16 @@ extern int yylineno;
 "}"                 { return RBRACE; }
 "["                 { return LBRACKET; }
 "]"                 { return RBRACKET; }
-"sizeof"            { return SIZEOF; }
-"printf"   { return IDENTIFIER; }
+
 [0-9]+\.[0-9]+      { yylval.num = atof(yytext); return FLOAT; }
 [0-9]+              { yylval.num = atoi(yytext); return NUMBER; }
-
 \"([^\"\\]|\\.)*\"  { yylval.str = strdup(yytext); return STRING_LITERAL; }
 
 [a-zA-Z_][a-zA-Z0-9_]* { yylval.str = strdup(yytext); return IDENTIFIER; }
 
-"#"                 { /* 忽略注釋符號 # */ }
-
-\n                  { yylineno++; }
+"#"                 { /* skip */ }
 [ \t\r]+            { /* skip whitespace */ }
-
+\n                  { yylineno++; }
 .                   { printf("非法字元: %s\n", yytext); }
 %%
 int yywrap() { return 1; }

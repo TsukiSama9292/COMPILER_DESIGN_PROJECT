@@ -26,80 +26,88 @@ Grammar
     6            | INT IDENTIFIER LBRACKET RBRACKET SEMICOLON
     7            | INT IDENTIFIER LBRACKET RBRACKET ASSIGN array_initializer SEMICOLON
     8            | function_definition
+    9            | error SEMICOLON
 
-    9 function_definition: INT IDENTIFIER LPAREN RPAREN compound_statement
+   10 function_definition: INT IDENTIFIER LPAREN parameter_list_opt RPAREN compound_statement
 
-   10 compound_statement: LBRACE statements RBRACE
+   11 parameter_list_opt: %empty
+   12                   | parameter_list
 
-   11 statements: statements statement
-   12           | statement
+   13 parameter_list: INT IDENTIFIER
+   14               | parameter_list COMMA INT IDENTIFIER
 
-   13 statement: expression_statement
-   14          | compound_statement
-   15          | selection_statement
-   16          | iteration_statement
-   17          | jump_statement
+   15 compound_statement: LBRACE statements RBRACE
 
-   18 expression_statement: expression SEMICOLON
-   19                     | SEMICOLON
+   16 statements: statements statement
+   17           | %empty
 
-   20 selection_statement: IF LPAREN expression RPAREN statement
-   21                    | IF LPAREN expression RPAREN statement ELSE statement
+   18 statement: expression_statement
+   19          | compound_statement
+   20          | selection_statement
+   21          | iteration_statement
+   22          | jump_statement
+   23          | error SEMICOLON
 
-   22 iteration_statement: FOR LPAREN expression_statement expression_statement expression RPAREN statement
-   23                    | WHILE LPAREN expression RPAREN statement
+   24 expression_statement: expression SEMICOLON
+   25                     | SEMICOLON
 
-   24 jump_statement: RETURN expression SEMICOLON
+   26 selection_statement: IF LPAREN expression RPAREN statement
+   27                    | IF LPAREN expression RPAREN statement ELSE statement
 
-   25 expression: IDENTIFIER ASSIGN expression
-   26           | function_call
-   27           | simple_expression
-   28           | SIZEOF LPAREN expression RPAREN
+   28 iteration_statement: FOR LPAREN expression_statement expression_statement expression RPAREN statement
+   29                    | WHILE LPAREN expression RPAREN statement
 
-   29 function_call: IDENTIFIER LPAREN argument_list_opt RPAREN
+   30 jump_statement: RETURN expression SEMICOLON
 
-   30 simple_expression: simple_expression PLUS term
-   31                  | simple_expression MINUS term
-   32                  | term
+   31 expression: IDENTIFIER ASSIGN expression
+   32           | function_call
+   33           | simple_expression
+   34           | SIZEOF LPAREN expression RPAREN
 
-   33 term: term MULT factor
-   34     | term DIV factor
-   35     | factor
+   35 function_call: IDENTIFIER LPAREN argument_list_opt RPAREN
 
-   36 factor: LPAREN expression RPAREN
-   37       | IDENTIFIER
-   38       | IDENTIFIER LBRACKET expression RBRACKET
-   39       | NUMBER
-   40       | STRING_LITERAL
-   41       | FLOAT
+   36 simple_expression: simple_expression PLUS term
+   37                  | simple_expression MINUS term
+   38                  | term
 
-   42 argument_list_opt: %empty
-   43                  | argument_list
+   39 term: term MULT factor
+   40     | term DIV factor
+   41     | factor
 
-   44 argument_list: expression
-   45              | argument_list COMMA expression
+   42 factor: LPAREN expression RPAREN
+   43       | IDENTIFIER
+   44       | IDENTIFIER LBRACKET expression RBRACKET
+   45       | NUMBER
+   46       | STRING_LITERAL
+   47       | FLOAT
 
-   46 array_initializer: LBRACE initializer_list RBRACE
+   48 argument_list_opt: %empty
+   49                  | argument_list
 
-   47 initializer_list: expression
-   48                 | initializer_list COMMA expression
+   50 argument_list: expression
+   51              | argument_list COMMA expression
+
+   52 array_initializer: LBRACE initializer_list RBRACE
+
+   53 initializer_list: expression
+   54                 | initializer_list COMMA expression
 
 
 Terminals, with rules where they appear
 
     $end (0) 0
-    error (256)
-    IDENTIFIER <str> (258) 4 5 6 7 9 25 29 37 38
-    STRING_LITERAL <str> (259) 40
-    NUMBER <num> (260) 39
-    FLOAT <num> (261) 41
-    SIZEOF (262) 28
-    INT (263) 4 5 6 7 9
-    RETURN (264) 24
-    IF (265) 20 21
-    ELSE (266) 21
-    FOR (267) 22
-    WHILE (268) 23
+    error (256) 9 23
+    IDENTIFIER <str> (258) 4 5 6 7 10 13 14 31 35 43 44
+    STRING_LITERAL <str> (259) 46
+    NUMBER <num> (260) 45
+    FLOAT <num> (261) 47
+    SIZEOF (262) 34
+    INT (263) 4 5 6 7 10 13 14
+    RETURN (264) 30
+    IF (265) 26 27
+    ELSE (266) 27
+    FOR (267) 28
+    WHILE (268) 29
     PRINTF (269)
     EQ (270)
     NEQ (271)
@@ -107,22 +115,22 @@ Terminals, with rules where they appear
     LE (273)
     GT (274)
     LT (275)
-    ASSIGN (276) 5 7 25
-    PLUS (277) 30
-    MINUS (278) 31
-    MULT (279) 33
-    DIV (280) 34
+    ASSIGN (276) 5 7 31
+    PLUS (277) 36
+    MINUS (278) 37
+    MULT (279) 39
+    DIV (280) 40
     INC (281)
     DEC (282)
     DOT (283)
-    SEMICOLON (284) 4 5 6 7 18 19 24
-    COMMA (285) 45 48
-    LPAREN (286) 9 20 21 22 23 28 29 36
-    RPAREN (287) 9 20 21 22 23 28 29 36
-    LBRACE (288) 10 46
-    RBRACE (289) 10 46
-    LBRACKET (290) 6 7 38
-    RBRACKET (291) 6 7 38
+    SEMICOLON (284) 4 5 6 7 9 23 24 25 30
+    COMMA (285) 14 51 54
+    LPAREN (286) 10 26 27 28 29 34 35 42
+    RPAREN (287) 10 26 27 28 29 34 35 42
+    LBRACE (288) 15 52
+    RBRACE (289) 15 52
+    LBRACKET (290) 6 7 44
+    RBRACKET (291) 6 7 44
     LOWER_THAN_ELSE (292)
 
 
@@ -137,1161 +145,1230 @@ Nonterminals, with rules where they appear
         on left: 2 3
         on right: 1 2
     declaration (41)
-        on left: 4 5 6 7 8
+        on left: 4 5 6 7 8 9
         on right: 2 3
     function_definition (42)
-        on left: 9
-        on right: 8
-    compound_statement (43)
         on left: 10
-        on right: 9 14
-    statements (44)
+        on right: 8
+    parameter_list_opt (43)
         on left: 11 12
-        on right: 10 11
-    statement (45)
-        on left: 13 14 15 16 17
-        on right: 11 12 20 21 22 23
-    expression_statement (46)
-        on left: 18 19
-        on right: 13 22
-    selection_statement (47)
-        on left: 20 21
-        on right: 15
-    iteration_statement (48)
-        on left: 22 23
-        on right: 16
-    jump_statement (49)
-        on left: 24
-        on right: 17
-    expression (50)
-        on left: 25 26 27 28
-        on right: 5 18 20 21 22 23 24 25 28 36 38 44 45 47 48
-    function_call (51)
-        on left: 29
-        on right: 26
-    simple_expression (52)
-        on left: 30 31 32
-        on right: 27 30 31
-    term (53)
-        on left: 33 34 35
-        on right: 30 31 32 33 34
-    factor (54)
-        on left: 36 37 38 39 40 41
-        on right: 33 34 35
-    argument_list_opt (55)
-        on left: 42 43
-        on right: 29
-    argument_list (56)
-        on left: 44 45
-        on right: 43 45
-    array_initializer (57)
-        on left: 46
+        on right: 10
+    parameter_list (44)
+        on left: 13 14
+        on right: 12 14
+    compound_statement (45)
+        on left: 15
+        on right: 10 19
+    statements (46)
+        on left: 16 17
+        on right: 15 16
+    statement (47)
+        on left: 18 19 20 21 22 23
+        on right: 16 26 27 28 29
+    expression_statement (48)
+        on left: 24 25
+        on right: 18 28
+    selection_statement (49)
+        on left: 26 27
+        on right: 20
+    iteration_statement (50)
+        on left: 28 29
+        on right: 21
+    jump_statement (51)
+        on left: 30
+        on right: 22
+    expression (52)
+        on left: 31 32 33 34
+        on right: 5 24 26 27 28 29 30 31 34 42 44 50 51 53 54
+    function_call (53)
+        on left: 35
+        on right: 32
+    simple_expression (54)
+        on left: 36 37 38
+        on right: 33 36 37
+    term (55)
+        on left: 39 40 41
+        on right: 36 37 38 39 40
+    factor (56)
+        on left: 42 43 44 45 46 47
+        on right: 39 40 41
+    argument_list_opt (57)
+        on left: 48 49
+        on right: 35
+    argument_list (58)
+        on left: 50 51
+        on right: 49 51
+    array_initializer (59)
+        on left: 52
         on right: 7
-    initializer_list (58)
-        on left: 47 48
-        on right: 46 48
+    initializer_list (60)
+        on left: 53 54
+        on right: 52 54
 
 
 State 0
 
     0 $accept: . program $end
 
-    INT  shift, and go to state 1
+    error  shift, and go to state 1
+    INT    shift, and go to state 2
 
-    program              go to state 2
-    declarations         go to state 3
-    declaration          go to state 4
-    function_definition  go to state 5
+    program              go to state 3
+    declarations         go to state 4
+    declaration          go to state 5
+    function_definition  go to state 6
 
 
 State 1
+
+    9 declaration: error . SEMICOLON
+
+    SEMICOLON  shift, and go to state 7
+
+
+State 2
 
     4 declaration: INT . IDENTIFIER SEMICOLON
     5            | INT . IDENTIFIER ASSIGN expression SEMICOLON
     6            | INT . IDENTIFIER LBRACKET RBRACKET SEMICOLON
     7            | INT . IDENTIFIER LBRACKET RBRACKET ASSIGN array_initializer SEMICOLON
-    9 function_definition: INT . IDENTIFIER LPAREN RPAREN compound_statement
+   10 function_definition: INT . IDENTIFIER LPAREN parameter_list_opt RPAREN compound_statement
 
-    IDENTIFIER  shift, and go to state 6
-
-
-State 2
-
-    0 $accept: program . $end
-
-    $end  shift, and go to state 7
+    IDENTIFIER  shift, and go to state 8
 
 
 State 3
 
-    1 program: declarations .
-    2 declarations: declarations . declaration
+    0 $accept: program . $end
 
-    INT  shift, and go to state 1
-
-    $default  reduce using rule 1 (program)
-
-    declaration          go to state 8
-    function_definition  go to state 5
+    $end  shift, and go to state 9
 
 
 State 4
+
+    1 program: declarations .
+    2 declarations: declarations . declaration
+
+    error  shift, and go to state 1
+    INT    shift, and go to state 2
+
+    $end  reduce using rule 1 (program)
+
+    declaration          go to state 10
+    function_definition  go to state 6
+
+
+State 5
 
     3 declarations: declaration .
 
     $default  reduce using rule 3 (declarations)
 
 
-State 5
+State 6
 
     8 declaration: function_definition .
 
     $default  reduce using rule 8 (declaration)
 
 
-State 6
+State 7
+
+    9 declaration: error SEMICOLON .
+
+    $default  reduce using rule 9 (declaration)
+
+
+State 8
 
     4 declaration: INT IDENTIFIER . SEMICOLON
     5            | INT IDENTIFIER . ASSIGN expression SEMICOLON
     6            | INT IDENTIFIER . LBRACKET RBRACKET SEMICOLON
     7            | INT IDENTIFIER . LBRACKET RBRACKET ASSIGN array_initializer SEMICOLON
-    9 function_definition: INT IDENTIFIER . LPAREN RPAREN compound_statement
+   10 function_definition: INT IDENTIFIER . LPAREN parameter_list_opt RPAREN compound_statement
 
-    ASSIGN     shift, and go to state 9
-    SEMICOLON  shift, and go to state 10
-    LPAREN     shift, and go to state 11
-    LBRACKET   shift, and go to state 12
+    ASSIGN     shift, and go to state 11
+    SEMICOLON  shift, and go to state 12
+    LPAREN     shift, and go to state 13
+    LBRACKET   shift, and go to state 14
 
 
-State 7
+State 9
 
     0 $accept: program $end .
 
     $default  accept
 
 
-State 8
+State 10
 
     2 declarations: declarations declaration .
 
     $default  reduce using rule 2 (declarations)
 
 
-State 9
+State 11
 
     5 declaration: INT IDENTIFIER ASSIGN . expression SEMICOLON
 
-    IDENTIFIER      shift, and go to state 13
-    STRING_LITERAL  shift, and go to state 14
-    NUMBER          shift, and go to state 15
-    FLOAT           shift, and go to state 16
-    SIZEOF          shift, and go to state 17
-    LPAREN          shift, and go to state 18
+    IDENTIFIER      shift, and go to state 15
+    STRING_LITERAL  shift, and go to state 16
+    NUMBER          shift, and go to state 17
+    FLOAT           shift, and go to state 18
+    SIZEOF          shift, and go to state 19
+    LPAREN          shift, and go to state 20
 
-    expression         go to state 19
-    function_call      go to state 20
-    simple_expression  go to state 21
-    term               go to state 22
-    factor             go to state 23
+    expression         go to state 21
+    function_call      go to state 22
+    simple_expression  go to state 23
+    term               go to state 24
+    factor             go to state 25
 
 
-State 10
+State 12
 
     4 declaration: INT IDENTIFIER SEMICOLON .
 
     $default  reduce using rule 4 (declaration)
 
 
-State 11
-
-    9 function_definition: INT IDENTIFIER LPAREN . RPAREN compound_statement
-
-    RPAREN  shift, and go to state 24
-
-
-State 12
-
-    6 declaration: INT IDENTIFIER LBRACKET . RBRACKET SEMICOLON
-    7            | INT IDENTIFIER LBRACKET . RBRACKET ASSIGN array_initializer SEMICOLON
-
-    RBRACKET  shift, and go to state 25
-
-
 State 13
 
-   25 expression: IDENTIFIER . ASSIGN expression
-   29 function_call: IDENTIFIER . LPAREN argument_list_opt RPAREN
-   37 factor: IDENTIFIER .
-   38       | IDENTIFIER . LBRACKET expression RBRACKET
+   10 function_definition: INT IDENTIFIER LPAREN . parameter_list_opt RPAREN compound_statement
 
-    ASSIGN    shift, and go to state 26
-    LPAREN    shift, and go to state 27
-    LBRACKET  shift, and go to state 28
+    INT  shift, and go to state 26
 
-    $default  reduce using rule 37 (factor)
+    $default  reduce using rule 11 (parameter_list_opt)
+
+    parameter_list_opt  go to state 27
+    parameter_list      go to state 28
 
 
 State 14
 
-   40 factor: STRING_LITERAL .
+    6 declaration: INT IDENTIFIER LBRACKET . RBRACKET SEMICOLON
+    7            | INT IDENTIFIER LBRACKET . RBRACKET ASSIGN array_initializer SEMICOLON
 
-    $default  reduce using rule 40 (factor)
+    RBRACKET  shift, and go to state 29
 
 
 State 15
 
-   39 factor: NUMBER .
+   31 expression: IDENTIFIER . ASSIGN expression
+   35 function_call: IDENTIFIER . LPAREN argument_list_opt RPAREN
+   43 factor: IDENTIFIER .
+   44       | IDENTIFIER . LBRACKET expression RBRACKET
 
-    $default  reduce using rule 39 (factor)
+    ASSIGN    shift, and go to state 30
+    LPAREN    shift, and go to state 31
+    LBRACKET  shift, and go to state 32
+
+    $default  reduce using rule 43 (factor)
 
 
 State 16
 
-   41 factor: FLOAT .
+   46 factor: STRING_LITERAL .
 
-    $default  reduce using rule 41 (factor)
+    $default  reduce using rule 46 (factor)
 
 
 State 17
 
-   28 expression: SIZEOF . LPAREN expression RPAREN
+   45 factor: NUMBER .
 
-    LPAREN  shift, and go to state 29
+    $default  reduce using rule 45 (factor)
 
 
 State 18
 
-   36 factor: LPAREN . expression RPAREN
+   47 factor: FLOAT .
 
-    IDENTIFIER      shift, and go to state 13
-    STRING_LITERAL  shift, and go to state 14
-    NUMBER          shift, and go to state 15
-    FLOAT           shift, and go to state 16
-    SIZEOF          shift, and go to state 17
-    LPAREN          shift, and go to state 18
-
-    expression         go to state 30
-    function_call      go to state 20
-    simple_expression  go to state 21
-    term               go to state 22
-    factor             go to state 23
+    $default  reduce using rule 47 (factor)
 
 
 State 19
 
-    5 declaration: INT IDENTIFIER ASSIGN expression . SEMICOLON
+   34 expression: SIZEOF . LPAREN expression RPAREN
 
-    SEMICOLON  shift, and go to state 31
+    LPAREN  shift, and go to state 33
 
 
 State 20
 
-   26 expression: function_call .
+   42 factor: LPAREN . expression RPAREN
 
-    $default  reduce using rule 26 (expression)
+    IDENTIFIER      shift, and go to state 15
+    STRING_LITERAL  shift, and go to state 16
+    NUMBER          shift, and go to state 17
+    FLOAT           shift, and go to state 18
+    SIZEOF          shift, and go to state 19
+    LPAREN          shift, and go to state 20
+
+    expression         go to state 34
+    function_call      go to state 22
+    simple_expression  go to state 23
+    term               go to state 24
+    factor             go to state 25
 
 
 State 21
 
-   27 expression: simple_expression .
-   30 simple_expression: simple_expression . PLUS term
-   31                  | simple_expression . MINUS term
+    5 declaration: INT IDENTIFIER ASSIGN expression . SEMICOLON
 
-    PLUS   shift, and go to state 32
-    MINUS  shift, and go to state 33
-
-    $default  reduce using rule 27 (expression)
+    SEMICOLON  shift, and go to state 35
 
 
 State 22
 
-   32 simple_expression: term .
-   33 term: term . MULT factor
-   34     | term . DIV factor
+   32 expression: function_call .
 
-    MULT  shift, and go to state 34
-    DIV   shift, and go to state 35
-
-    $default  reduce using rule 32 (simple_expression)
+    $default  reduce using rule 32 (expression)
 
 
 State 23
 
-   35 term: factor .
+   33 expression: simple_expression .
+   36 simple_expression: simple_expression . PLUS term
+   37                  | simple_expression . MINUS term
 
-    $default  reduce using rule 35 (term)
+    PLUS   shift, and go to state 36
+    MINUS  shift, and go to state 37
+
+    $default  reduce using rule 33 (expression)
 
 
 State 24
 
-    9 function_definition: INT IDENTIFIER LPAREN RPAREN . compound_statement
+   38 simple_expression: term .
+   39 term: term . MULT factor
+   40     | term . DIV factor
 
-    LBRACE  shift, and go to state 36
+    MULT  shift, and go to state 38
+    DIV   shift, and go to state 39
 
-    compound_statement  go to state 37
+    $default  reduce using rule 38 (simple_expression)
 
 
 State 25
 
-    6 declaration: INT IDENTIFIER LBRACKET RBRACKET . SEMICOLON
-    7            | INT IDENTIFIER LBRACKET RBRACKET . ASSIGN array_initializer SEMICOLON
+   41 term: factor .
 
-    ASSIGN     shift, and go to state 38
-    SEMICOLON  shift, and go to state 39
+    $default  reduce using rule 41 (term)
 
 
 State 26
 
-   25 expression: IDENTIFIER ASSIGN . expression
+   13 parameter_list: INT . IDENTIFIER
 
-    IDENTIFIER      shift, and go to state 13
-    STRING_LITERAL  shift, and go to state 14
-    NUMBER          shift, and go to state 15
-    FLOAT           shift, and go to state 16
-    SIZEOF          shift, and go to state 17
-    LPAREN          shift, and go to state 18
-
-    expression         go to state 40
-    function_call      go to state 20
-    simple_expression  go to state 21
-    term               go to state 22
-    factor             go to state 23
+    IDENTIFIER  shift, and go to state 40
 
 
 State 27
 
-   29 function_call: IDENTIFIER LPAREN . argument_list_opt RPAREN
+   10 function_definition: INT IDENTIFIER LPAREN parameter_list_opt . RPAREN compound_statement
 
-    IDENTIFIER      shift, and go to state 13
-    STRING_LITERAL  shift, and go to state 14
-    NUMBER          shift, and go to state 15
-    FLOAT           shift, and go to state 16
-    SIZEOF          shift, and go to state 17
-    LPAREN          shift, and go to state 18
-
-    $default  reduce using rule 42 (argument_list_opt)
-
-    expression         go to state 41
-    function_call      go to state 20
-    simple_expression  go to state 21
-    term               go to state 22
-    factor             go to state 23
-    argument_list_opt  go to state 42
-    argument_list      go to state 43
+    RPAREN  shift, and go to state 41
 
 
 State 28
 
-   38 factor: IDENTIFIER LBRACKET . expression RBRACKET
+   12 parameter_list_opt: parameter_list .
+   14 parameter_list: parameter_list . COMMA INT IDENTIFIER
 
-    IDENTIFIER      shift, and go to state 13
-    STRING_LITERAL  shift, and go to state 14
-    NUMBER          shift, and go to state 15
-    FLOAT           shift, and go to state 16
-    SIZEOF          shift, and go to state 17
-    LPAREN          shift, and go to state 18
+    COMMA  shift, and go to state 42
 
-    expression         go to state 44
-    function_call      go to state 20
-    simple_expression  go to state 21
-    term               go to state 22
-    factor             go to state 23
+    $default  reduce using rule 12 (parameter_list_opt)
 
 
 State 29
 
-   28 expression: SIZEOF LPAREN . expression RPAREN
+    6 declaration: INT IDENTIFIER LBRACKET RBRACKET . SEMICOLON
+    7            | INT IDENTIFIER LBRACKET RBRACKET . ASSIGN array_initializer SEMICOLON
 
-    IDENTIFIER      shift, and go to state 13
-    STRING_LITERAL  shift, and go to state 14
-    NUMBER          shift, and go to state 15
-    FLOAT           shift, and go to state 16
-    SIZEOF          shift, and go to state 17
-    LPAREN          shift, and go to state 18
-
-    expression         go to state 45
-    function_call      go to state 20
-    simple_expression  go to state 21
-    term               go to state 22
-    factor             go to state 23
+    ASSIGN     shift, and go to state 43
+    SEMICOLON  shift, and go to state 44
 
 
 State 30
 
-   36 factor: LPAREN expression . RPAREN
+   31 expression: IDENTIFIER ASSIGN . expression
 
-    RPAREN  shift, and go to state 46
+    IDENTIFIER      shift, and go to state 15
+    STRING_LITERAL  shift, and go to state 16
+    NUMBER          shift, and go to state 17
+    FLOAT           shift, and go to state 18
+    SIZEOF          shift, and go to state 19
+    LPAREN          shift, and go to state 20
+
+    expression         go to state 45
+    function_call      go to state 22
+    simple_expression  go to state 23
+    term               go to state 24
+    factor             go to state 25
 
 
 State 31
+
+   35 function_call: IDENTIFIER LPAREN . argument_list_opt RPAREN
+
+    IDENTIFIER      shift, and go to state 15
+    STRING_LITERAL  shift, and go to state 16
+    NUMBER          shift, and go to state 17
+    FLOAT           shift, and go to state 18
+    SIZEOF          shift, and go to state 19
+    LPAREN          shift, and go to state 20
+
+    $default  reduce using rule 48 (argument_list_opt)
+
+    expression         go to state 46
+    function_call      go to state 22
+    simple_expression  go to state 23
+    term               go to state 24
+    factor             go to state 25
+    argument_list_opt  go to state 47
+    argument_list      go to state 48
+
+
+State 32
+
+   44 factor: IDENTIFIER LBRACKET . expression RBRACKET
+
+    IDENTIFIER      shift, and go to state 15
+    STRING_LITERAL  shift, and go to state 16
+    NUMBER          shift, and go to state 17
+    FLOAT           shift, and go to state 18
+    SIZEOF          shift, and go to state 19
+    LPAREN          shift, and go to state 20
+
+    expression         go to state 49
+    function_call      go to state 22
+    simple_expression  go to state 23
+    term               go to state 24
+    factor             go to state 25
+
+
+State 33
+
+   34 expression: SIZEOF LPAREN . expression RPAREN
+
+    IDENTIFIER      shift, and go to state 15
+    STRING_LITERAL  shift, and go to state 16
+    NUMBER          shift, and go to state 17
+    FLOAT           shift, and go to state 18
+    SIZEOF          shift, and go to state 19
+    LPAREN          shift, and go to state 20
+
+    expression         go to state 50
+    function_call      go to state 22
+    simple_expression  go to state 23
+    term               go to state 24
+    factor             go to state 25
+
+
+State 34
+
+   42 factor: LPAREN expression . RPAREN
+
+    RPAREN  shift, and go to state 51
+
+
+State 35
 
     5 declaration: INT IDENTIFIER ASSIGN expression SEMICOLON .
 
     $default  reduce using rule 5 (declaration)
 
 
-State 32
-
-   30 simple_expression: simple_expression PLUS . term
-
-    IDENTIFIER      shift, and go to state 47
-    STRING_LITERAL  shift, and go to state 14
-    NUMBER          shift, and go to state 15
-    FLOAT           shift, and go to state 16
-    LPAREN          shift, and go to state 18
-
-    term    go to state 48
-    factor  go to state 23
-
-
-State 33
-
-   31 simple_expression: simple_expression MINUS . term
-
-    IDENTIFIER      shift, and go to state 47
-    STRING_LITERAL  shift, and go to state 14
-    NUMBER          shift, and go to state 15
-    FLOAT           shift, and go to state 16
-    LPAREN          shift, and go to state 18
-
-    term    go to state 49
-    factor  go to state 23
-
-
-State 34
-
-   33 term: term MULT . factor
-
-    IDENTIFIER      shift, and go to state 47
-    STRING_LITERAL  shift, and go to state 14
-    NUMBER          shift, and go to state 15
-    FLOAT           shift, and go to state 16
-    LPAREN          shift, and go to state 18
-
-    factor  go to state 50
-
-
-State 35
-
-   34 term: term DIV . factor
-
-    IDENTIFIER      shift, and go to state 47
-    STRING_LITERAL  shift, and go to state 14
-    NUMBER          shift, and go to state 15
-    FLOAT           shift, and go to state 16
-    LPAREN          shift, and go to state 18
-
-    factor  go to state 51
-
-
 State 36
 
-   10 compound_statement: LBRACE . statements RBRACE
+   36 simple_expression: simple_expression PLUS . term
 
-    IDENTIFIER      shift, and go to state 13
-    STRING_LITERAL  shift, and go to state 14
-    NUMBER          shift, and go to state 15
-    FLOAT           shift, and go to state 16
-    SIZEOF          shift, and go to state 17
-    RETURN          shift, and go to state 52
-    IF              shift, and go to state 53
-    FOR             shift, and go to state 54
-    WHILE           shift, and go to state 55
-    SEMICOLON       shift, and go to state 56
-    LPAREN          shift, and go to state 18
-    LBRACE          shift, and go to state 36
+    IDENTIFIER      shift, and go to state 52
+    STRING_LITERAL  shift, and go to state 16
+    NUMBER          shift, and go to state 17
+    FLOAT           shift, and go to state 18
+    LPAREN          shift, and go to state 20
 
-    compound_statement    go to state 57
-    statements            go to state 58
-    statement             go to state 59
-    expression_statement  go to state 60
-    selection_statement   go to state 61
-    iteration_statement   go to state 62
-    jump_statement        go to state 63
-    expression            go to state 64
-    function_call         go to state 20
-    simple_expression     go to state 21
-    term                  go to state 22
-    factor                go to state 23
+    term    go to state 53
+    factor  go to state 25
 
 
 State 37
 
-    9 function_definition: INT IDENTIFIER LPAREN RPAREN compound_statement .
+   37 simple_expression: simple_expression MINUS . term
 
-    $default  reduce using rule 9 (function_definition)
+    IDENTIFIER      shift, and go to state 52
+    STRING_LITERAL  shift, and go to state 16
+    NUMBER          shift, and go to state 17
+    FLOAT           shift, and go to state 18
+    LPAREN          shift, and go to state 20
+
+    term    go to state 54
+    factor  go to state 25
 
 
 State 38
 
-    7 declaration: INT IDENTIFIER LBRACKET RBRACKET ASSIGN . array_initializer SEMICOLON
+   39 term: term MULT . factor
 
-    LBRACE  shift, and go to state 65
+    IDENTIFIER      shift, and go to state 52
+    STRING_LITERAL  shift, and go to state 16
+    NUMBER          shift, and go to state 17
+    FLOAT           shift, and go to state 18
+    LPAREN          shift, and go to state 20
 
-    array_initializer  go to state 66
+    factor  go to state 55
 
 
 State 39
+
+   40 term: term DIV . factor
+
+    IDENTIFIER      shift, and go to state 52
+    STRING_LITERAL  shift, and go to state 16
+    NUMBER          shift, and go to state 17
+    FLOAT           shift, and go to state 18
+    LPAREN          shift, and go to state 20
+
+    factor  go to state 56
+
+
+State 40
+
+   13 parameter_list: INT IDENTIFIER .
+
+    $default  reduce using rule 13 (parameter_list)
+
+
+State 41
+
+   10 function_definition: INT IDENTIFIER LPAREN parameter_list_opt RPAREN . compound_statement
+
+    LBRACE  shift, and go to state 57
+
+    compound_statement  go to state 58
+
+
+State 42
+
+   14 parameter_list: parameter_list COMMA . INT IDENTIFIER
+
+    INT  shift, and go to state 59
+
+
+State 43
+
+    7 declaration: INT IDENTIFIER LBRACKET RBRACKET ASSIGN . array_initializer SEMICOLON
+
+    LBRACE  shift, and go to state 60
+
+    array_initializer  go to state 61
+
+
+State 44
 
     6 declaration: INT IDENTIFIER LBRACKET RBRACKET SEMICOLON .
 
     $default  reduce using rule 6 (declaration)
 
 
-State 40
-
-   25 expression: IDENTIFIER ASSIGN expression .
-
-    $default  reduce using rule 25 (expression)
-
-
-State 41
-
-   44 argument_list: expression .
-
-    $default  reduce using rule 44 (argument_list)
-
-
-State 42
-
-   29 function_call: IDENTIFIER LPAREN argument_list_opt . RPAREN
-
-    RPAREN  shift, and go to state 67
-
-
-State 43
-
-   43 argument_list_opt: argument_list .
-   45 argument_list: argument_list . COMMA expression
-
-    COMMA  shift, and go to state 68
-
-    $default  reduce using rule 43 (argument_list_opt)
-
-
-State 44
-
-   38 factor: IDENTIFIER LBRACKET expression . RBRACKET
-
-    RBRACKET  shift, and go to state 69
-
-
 State 45
 
-   28 expression: SIZEOF LPAREN expression . RPAREN
+   31 expression: IDENTIFIER ASSIGN expression .
 
-    RPAREN  shift, and go to state 70
+    $default  reduce using rule 31 (expression)
 
 
 State 46
 
-   36 factor: LPAREN expression RPAREN .
+   50 argument_list: expression .
 
-    $default  reduce using rule 36 (factor)
+    $default  reduce using rule 50 (argument_list)
 
 
 State 47
 
-   37 factor: IDENTIFIER .
-   38       | IDENTIFIER . LBRACKET expression RBRACKET
+   35 function_call: IDENTIFIER LPAREN argument_list_opt . RPAREN
 
-    LBRACKET  shift, and go to state 28
-
-    $default  reduce using rule 37 (factor)
+    RPAREN  shift, and go to state 62
 
 
 State 48
 
-   30 simple_expression: simple_expression PLUS term .
-   33 term: term . MULT factor
-   34     | term . DIV factor
+   49 argument_list_opt: argument_list .
+   51 argument_list: argument_list . COMMA expression
 
-    MULT  shift, and go to state 34
-    DIV   shift, and go to state 35
+    COMMA  shift, and go to state 63
 
-    $default  reduce using rule 30 (simple_expression)
+    $default  reduce using rule 49 (argument_list_opt)
 
 
 State 49
 
-   31 simple_expression: simple_expression MINUS term .
-   33 term: term . MULT factor
-   34     | term . DIV factor
+   44 factor: IDENTIFIER LBRACKET expression . RBRACKET
 
-    MULT  shift, and go to state 34
-    DIV   shift, and go to state 35
-
-    $default  reduce using rule 31 (simple_expression)
+    RBRACKET  shift, and go to state 64
 
 
 State 50
 
-   33 term: term MULT factor .
+   34 expression: SIZEOF LPAREN expression . RPAREN
 
-    $default  reduce using rule 33 (term)
+    RPAREN  shift, and go to state 65
 
 
 State 51
 
-   34 term: term DIV factor .
+   42 factor: LPAREN expression RPAREN .
 
-    $default  reduce using rule 34 (term)
+    $default  reduce using rule 42 (factor)
 
 
 State 52
 
-   24 jump_statement: RETURN . expression SEMICOLON
+   43 factor: IDENTIFIER .
+   44       | IDENTIFIER . LBRACKET expression RBRACKET
 
-    IDENTIFIER      shift, and go to state 13
-    STRING_LITERAL  shift, and go to state 14
-    NUMBER          shift, and go to state 15
-    FLOAT           shift, and go to state 16
-    SIZEOF          shift, and go to state 17
-    LPAREN          shift, and go to state 18
+    LBRACKET  shift, and go to state 32
 
-    expression         go to state 71
-    function_call      go to state 20
-    simple_expression  go to state 21
-    term               go to state 22
-    factor             go to state 23
+    $default  reduce using rule 43 (factor)
 
 
 State 53
 
-   20 selection_statement: IF . LPAREN expression RPAREN statement
-   21                    | IF . LPAREN expression RPAREN statement ELSE statement
+   36 simple_expression: simple_expression PLUS term .
+   39 term: term . MULT factor
+   40     | term . DIV factor
 
-    LPAREN  shift, and go to state 72
+    MULT  shift, and go to state 38
+    DIV   shift, and go to state 39
+
+    $default  reduce using rule 36 (simple_expression)
 
 
 State 54
 
-   22 iteration_statement: FOR . LPAREN expression_statement expression_statement expression RPAREN statement
+   37 simple_expression: simple_expression MINUS term .
+   39 term: term . MULT factor
+   40     | term . DIV factor
 
-    LPAREN  shift, and go to state 73
+    MULT  shift, and go to state 38
+    DIV   shift, and go to state 39
+
+    $default  reduce using rule 37 (simple_expression)
 
 
 State 55
 
-   23 iteration_statement: WHILE . LPAREN expression RPAREN statement
+   39 term: term MULT factor .
 
-    LPAREN  shift, and go to state 74
+    $default  reduce using rule 39 (term)
 
 
 State 56
 
-   19 expression_statement: SEMICOLON .
+   40 term: term DIV factor .
 
-    $default  reduce using rule 19 (expression_statement)
+    $default  reduce using rule 40 (term)
 
 
 State 57
 
-   14 statement: compound_statement .
+   15 compound_statement: LBRACE . statements RBRACE
 
-    $default  reduce using rule 14 (statement)
+    $default  reduce using rule 17 (statements)
+
+    statements  go to state 66
 
 
 State 58
 
-   10 compound_statement: LBRACE statements . RBRACE
-   11 statements: statements . statement
+   10 function_definition: INT IDENTIFIER LPAREN parameter_list_opt RPAREN compound_statement .
 
-    IDENTIFIER      shift, and go to state 13
-    STRING_LITERAL  shift, and go to state 14
-    NUMBER          shift, and go to state 15
-    FLOAT           shift, and go to state 16
-    SIZEOF          shift, and go to state 17
-    RETURN          shift, and go to state 52
-    IF              shift, and go to state 53
-    FOR             shift, and go to state 54
-    WHILE           shift, and go to state 55
-    SEMICOLON       shift, and go to state 56
-    LPAREN          shift, and go to state 18
-    LBRACE          shift, and go to state 36
-    RBRACE          shift, and go to state 75
-
-    compound_statement    go to state 57
-    statement             go to state 76
-    expression_statement  go to state 60
-    selection_statement   go to state 61
-    iteration_statement   go to state 62
-    jump_statement        go to state 63
-    expression            go to state 64
-    function_call         go to state 20
-    simple_expression     go to state 21
-    term                  go to state 22
-    factor                go to state 23
+    $default  reduce using rule 10 (function_definition)
 
 
 State 59
 
-   12 statements: statement .
+   14 parameter_list: parameter_list COMMA INT . IDENTIFIER
 
-    $default  reduce using rule 12 (statements)
+    IDENTIFIER  shift, and go to state 67
 
 
 State 60
 
-   13 statement: expression_statement .
+   52 array_initializer: LBRACE . initializer_list RBRACE
 
-    $default  reduce using rule 13 (statement)
+    IDENTIFIER      shift, and go to state 15
+    STRING_LITERAL  shift, and go to state 16
+    NUMBER          shift, and go to state 17
+    FLOAT           shift, and go to state 18
+    SIZEOF          shift, and go to state 19
+    LPAREN          shift, and go to state 20
+
+    expression         go to state 68
+    function_call      go to state 22
+    simple_expression  go to state 23
+    term               go to state 24
+    factor             go to state 25
+    initializer_list   go to state 69
 
 
 State 61
 
-   15 statement: selection_statement .
+    7 declaration: INT IDENTIFIER LBRACKET RBRACKET ASSIGN array_initializer . SEMICOLON
 
-    $default  reduce using rule 15 (statement)
+    SEMICOLON  shift, and go to state 70
 
 
 State 62
 
-   16 statement: iteration_statement .
+   35 function_call: IDENTIFIER LPAREN argument_list_opt RPAREN .
 
-    $default  reduce using rule 16 (statement)
+    $default  reduce using rule 35 (function_call)
 
 
 State 63
 
-   17 statement: jump_statement .
+   51 argument_list: argument_list COMMA . expression
 
-    $default  reduce using rule 17 (statement)
+    IDENTIFIER      shift, and go to state 15
+    STRING_LITERAL  shift, and go to state 16
+    NUMBER          shift, and go to state 17
+    FLOAT           shift, and go to state 18
+    SIZEOF          shift, and go to state 19
+    LPAREN          shift, and go to state 20
+
+    expression         go to state 71
+    function_call      go to state 22
+    simple_expression  go to state 23
+    term               go to state 24
+    factor             go to state 25
 
 
 State 64
 
-   18 expression_statement: expression . SEMICOLON
+   44 factor: IDENTIFIER LBRACKET expression RBRACKET .
 
-    SEMICOLON  shift, and go to state 77
+    $default  reduce using rule 44 (factor)
 
 
 State 65
 
-   46 array_initializer: LBRACE . initializer_list RBRACE
+   34 expression: SIZEOF LPAREN expression RPAREN .
 
-    IDENTIFIER      shift, and go to state 13
-    STRING_LITERAL  shift, and go to state 14
-    NUMBER          shift, and go to state 15
-    FLOAT           shift, and go to state 16
-    SIZEOF          shift, and go to state 17
-    LPAREN          shift, and go to state 18
-
-    expression         go to state 78
-    function_call      go to state 20
-    simple_expression  go to state 21
-    term               go to state 22
-    factor             go to state 23
-    initializer_list   go to state 79
+    $default  reduce using rule 34 (expression)
 
 
 State 66
 
-    7 declaration: INT IDENTIFIER LBRACKET RBRACKET ASSIGN array_initializer . SEMICOLON
+   15 compound_statement: LBRACE statements . RBRACE
+   16 statements: statements . statement
 
-    SEMICOLON  shift, and go to state 80
+    error           shift, and go to state 72
+    IDENTIFIER      shift, and go to state 15
+    STRING_LITERAL  shift, and go to state 16
+    NUMBER          shift, and go to state 17
+    FLOAT           shift, and go to state 18
+    SIZEOF          shift, and go to state 19
+    RETURN          shift, and go to state 73
+    IF              shift, and go to state 74
+    FOR             shift, and go to state 75
+    WHILE           shift, and go to state 76
+    SEMICOLON       shift, and go to state 77
+    LPAREN          shift, and go to state 20
+    LBRACE          shift, and go to state 57
+    RBRACE          shift, and go to state 78
+
+    compound_statement    go to state 79
+    statement             go to state 80
+    expression_statement  go to state 81
+    selection_statement   go to state 82
+    iteration_statement   go to state 83
+    jump_statement        go to state 84
+    expression            go to state 85
+    function_call         go to state 22
+    simple_expression     go to state 23
+    term                  go to state 24
+    factor                go to state 25
 
 
 State 67
 
-   29 function_call: IDENTIFIER LPAREN argument_list_opt RPAREN .
+   14 parameter_list: parameter_list COMMA INT IDENTIFIER .
 
-    $default  reduce using rule 29 (function_call)
+    $default  reduce using rule 14 (parameter_list)
 
 
 State 68
 
-   45 argument_list: argument_list COMMA . expression
+   53 initializer_list: expression .
 
-    IDENTIFIER      shift, and go to state 13
-    STRING_LITERAL  shift, and go to state 14
-    NUMBER          shift, and go to state 15
-    FLOAT           shift, and go to state 16
-    SIZEOF          shift, and go to state 17
-    LPAREN          shift, and go to state 18
-
-    expression         go to state 81
-    function_call      go to state 20
-    simple_expression  go to state 21
-    term               go to state 22
-    factor             go to state 23
+    $default  reduce using rule 53 (initializer_list)
 
 
 State 69
 
-   38 factor: IDENTIFIER LBRACKET expression RBRACKET .
-
-    $default  reduce using rule 38 (factor)
-
-
-State 70
-
-   28 expression: SIZEOF LPAREN expression RPAREN .
-
-    $default  reduce using rule 28 (expression)
-
-
-State 71
-
-   24 jump_statement: RETURN expression . SEMICOLON
-
-    SEMICOLON  shift, and go to state 82
-
-
-State 72
-
-   20 selection_statement: IF LPAREN . expression RPAREN statement
-   21                    | IF LPAREN . expression RPAREN statement ELSE statement
-
-    IDENTIFIER      shift, and go to state 13
-    STRING_LITERAL  shift, and go to state 14
-    NUMBER          shift, and go to state 15
-    FLOAT           shift, and go to state 16
-    SIZEOF          shift, and go to state 17
-    LPAREN          shift, and go to state 18
-
-    expression         go to state 83
-    function_call      go to state 20
-    simple_expression  go to state 21
-    term               go to state 22
-    factor             go to state 23
-
-
-State 73
-
-   22 iteration_statement: FOR LPAREN . expression_statement expression_statement expression RPAREN statement
-
-    IDENTIFIER      shift, and go to state 13
-    STRING_LITERAL  shift, and go to state 14
-    NUMBER          shift, and go to state 15
-    FLOAT           shift, and go to state 16
-    SIZEOF          shift, and go to state 17
-    SEMICOLON       shift, and go to state 56
-    LPAREN          shift, and go to state 18
-
-    expression_statement  go to state 84
-    expression            go to state 64
-    function_call         go to state 20
-    simple_expression     go to state 21
-    term                  go to state 22
-    factor                go to state 23
-
-
-State 74
-
-   23 iteration_statement: WHILE LPAREN . expression RPAREN statement
-
-    IDENTIFIER      shift, and go to state 13
-    STRING_LITERAL  shift, and go to state 14
-    NUMBER          shift, and go to state 15
-    FLOAT           shift, and go to state 16
-    SIZEOF          shift, and go to state 17
-    LPAREN          shift, and go to state 18
-
-    expression         go to state 85
-    function_call      go to state 20
-    simple_expression  go to state 21
-    term               go to state 22
-    factor             go to state 23
-
-
-State 75
-
-   10 compound_statement: LBRACE statements RBRACE .
-
-    $default  reduce using rule 10 (compound_statement)
-
-
-State 76
-
-   11 statements: statements statement .
-
-    $default  reduce using rule 11 (statements)
-
-
-State 77
-
-   18 expression_statement: expression SEMICOLON .
-
-    $default  reduce using rule 18 (expression_statement)
-
-
-State 78
-
-   47 initializer_list: expression .
-
-    $default  reduce using rule 47 (initializer_list)
-
-
-State 79
-
-   46 array_initializer: LBRACE initializer_list . RBRACE
-   48 initializer_list: initializer_list . COMMA expression
+   52 array_initializer: LBRACE initializer_list . RBRACE
+   54 initializer_list: initializer_list . COMMA expression
 
     COMMA   shift, and go to state 86
     RBRACE  shift, and go to state 87
 
 
-State 80
+State 70
 
     7 declaration: INT IDENTIFIER LBRACKET RBRACKET ASSIGN array_initializer SEMICOLON .
 
     $default  reduce using rule 7 (declaration)
 
 
+State 71
+
+   51 argument_list: argument_list COMMA expression .
+
+    $default  reduce using rule 51 (argument_list)
+
+
+State 72
+
+   23 statement: error . SEMICOLON
+
+    SEMICOLON  shift, and go to state 88
+
+
+State 73
+
+   30 jump_statement: RETURN . expression SEMICOLON
+
+    IDENTIFIER      shift, and go to state 15
+    STRING_LITERAL  shift, and go to state 16
+    NUMBER          shift, and go to state 17
+    FLOAT           shift, and go to state 18
+    SIZEOF          shift, and go to state 19
+    LPAREN          shift, and go to state 20
+
+    expression         go to state 89
+    function_call      go to state 22
+    simple_expression  go to state 23
+    term               go to state 24
+    factor             go to state 25
+
+
+State 74
+
+   26 selection_statement: IF . LPAREN expression RPAREN statement
+   27                    | IF . LPAREN expression RPAREN statement ELSE statement
+
+    LPAREN  shift, and go to state 90
+
+
+State 75
+
+   28 iteration_statement: FOR . LPAREN expression_statement expression_statement expression RPAREN statement
+
+    LPAREN  shift, and go to state 91
+
+
+State 76
+
+   29 iteration_statement: WHILE . LPAREN expression RPAREN statement
+
+    LPAREN  shift, and go to state 92
+
+
+State 77
+
+   25 expression_statement: SEMICOLON .
+
+    $default  reduce using rule 25 (expression_statement)
+
+
+State 78
+
+   15 compound_statement: LBRACE statements RBRACE .
+
+    $default  reduce using rule 15 (compound_statement)
+
+
+State 79
+
+   19 statement: compound_statement .
+
+    $default  reduce using rule 19 (statement)
+
+
+State 80
+
+   16 statements: statements statement .
+
+    $default  reduce using rule 16 (statements)
+
+
 State 81
 
-   45 argument_list: argument_list COMMA expression .
+   18 statement: expression_statement .
 
-    $default  reduce using rule 45 (argument_list)
+    $default  reduce using rule 18 (statement)
 
 
 State 82
 
-   24 jump_statement: RETURN expression SEMICOLON .
+   20 statement: selection_statement .
 
-    $default  reduce using rule 24 (jump_statement)
+    $default  reduce using rule 20 (statement)
 
 
 State 83
 
-   20 selection_statement: IF LPAREN expression . RPAREN statement
-   21                    | IF LPAREN expression . RPAREN statement ELSE statement
+   21 statement: iteration_statement .
 
-    RPAREN  shift, and go to state 88
+    $default  reduce using rule 21 (statement)
 
 
 State 84
 
-   22 iteration_statement: FOR LPAREN expression_statement . expression_statement expression RPAREN statement
+   22 statement: jump_statement .
 
-    IDENTIFIER      shift, and go to state 13
-    STRING_LITERAL  shift, and go to state 14
-    NUMBER          shift, and go to state 15
-    FLOAT           shift, and go to state 16
-    SIZEOF          shift, and go to state 17
-    SEMICOLON       shift, and go to state 56
-    LPAREN          shift, and go to state 18
-
-    expression_statement  go to state 89
-    expression            go to state 64
-    function_call         go to state 20
-    simple_expression     go to state 21
-    term                  go to state 22
-    factor                go to state 23
+    $default  reduce using rule 22 (statement)
 
 
 State 85
 
-   23 iteration_statement: WHILE LPAREN expression . RPAREN statement
+   24 expression_statement: expression . SEMICOLON
 
-    RPAREN  shift, and go to state 90
+    SEMICOLON  shift, and go to state 93
 
 
 State 86
 
-   48 initializer_list: initializer_list COMMA . expression
+   54 initializer_list: initializer_list COMMA . expression
 
-    IDENTIFIER      shift, and go to state 13
-    STRING_LITERAL  shift, and go to state 14
-    NUMBER          shift, and go to state 15
-    FLOAT           shift, and go to state 16
-    SIZEOF          shift, and go to state 17
-    LPAREN          shift, and go to state 18
+    IDENTIFIER      shift, and go to state 15
+    STRING_LITERAL  shift, and go to state 16
+    NUMBER          shift, and go to state 17
+    FLOAT           shift, and go to state 18
+    SIZEOF          shift, and go to state 19
+    LPAREN          shift, and go to state 20
 
-    expression         go to state 91
-    function_call      go to state 20
-    simple_expression  go to state 21
-    term               go to state 22
-    factor             go to state 23
+    expression         go to state 94
+    function_call      go to state 22
+    simple_expression  go to state 23
+    term               go to state 24
+    factor             go to state 25
 
 
 State 87
 
-   46 array_initializer: LBRACE initializer_list RBRACE .
+   52 array_initializer: LBRACE initializer_list RBRACE .
 
-    $default  reduce using rule 46 (array_initializer)
+    $default  reduce using rule 52 (array_initializer)
 
 
 State 88
 
-   20 selection_statement: IF LPAREN expression RPAREN . statement
-   21                    | IF LPAREN expression RPAREN . statement ELSE statement
+   23 statement: error SEMICOLON .
 
-    IDENTIFIER      shift, and go to state 13
-    STRING_LITERAL  shift, and go to state 14
-    NUMBER          shift, and go to state 15
-    FLOAT           shift, and go to state 16
-    SIZEOF          shift, and go to state 17
-    RETURN          shift, and go to state 52
-    IF              shift, and go to state 53
-    FOR             shift, and go to state 54
-    WHILE           shift, and go to state 55
-    SEMICOLON       shift, and go to state 56
-    LPAREN          shift, and go to state 18
-    LBRACE          shift, and go to state 36
-
-    compound_statement    go to state 57
-    statement             go to state 92
-    expression_statement  go to state 60
-    selection_statement   go to state 61
-    iteration_statement   go to state 62
-    jump_statement        go to state 63
-    expression            go to state 64
-    function_call         go to state 20
-    simple_expression     go to state 21
-    term                  go to state 22
-    factor                go to state 23
+    $default  reduce using rule 23 (statement)
 
 
 State 89
 
-   22 iteration_statement: FOR LPAREN expression_statement expression_statement . expression RPAREN statement
+   30 jump_statement: RETURN expression . SEMICOLON
 
-    IDENTIFIER      shift, and go to state 13
-    STRING_LITERAL  shift, and go to state 14
-    NUMBER          shift, and go to state 15
-    FLOAT           shift, and go to state 16
-    SIZEOF          shift, and go to state 17
-    LPAREN          shift, and go to state 18
-
-    expression         go to state 93
-    function_call      go to state 20
-    simple_expression  go to state 21
-    term               go to state 22
-    factor             go to state 23
+    SEMICOLON  shift, and go to state 95
 
 
 State 90
 
-   23 iteration_statement: WHILE LPAREN expression RPAREN . statement
+   26 selection_statement: IF LPAREN . expression RPAREN statement
+   27                    | IF LPAREN . expression RPAREN statement ELSE statement
 
-    IDENTIFIER      shift, and go to state 13
-    STRING_LITERAL  shift, and go to state 14
-    NUMBER          shift, and go to state 15
-    FLOAT           shift, and go to state 16
-    SIZEOF          shift, and go to state 17
-    RETURN          shift, and go to state 52
-    IF              shift, and go to state 53
-    FOR             shift, and go to state 54
-    WHILE           shift, and go to state 55
-    SEMICOLON       shift, and go to state 56
-    LPAREN          shift, and go to state 18
-    LBRACE          shift, and go to state 36
+    IDENTIFIER      shift, and go to state 15
+    STRING_LITERAL  shift, and go to state 16
+    NUMBER          shift, and go to state 17
+    FLOAT           shift, and go to state 18
+    SIZEOF          shift, and go to state 19
+    LPAREN          shift, and go to state 20
 
-    compound_statement    go to state 57
-    statement             go to state 94
-    expression_statement  go to state 60
-    selection_statement   go to state 61
-    iteration_statement   go to state 62
-    jump_statement        go to state 63
-    expression            go to state 64
-    function_call         go to state 20
-    simple_expression     go to state 21
-    term                  go to state 22
-    factor                go to state 23
+    expression         go to state 96
+    function_call      go to state 22
+    simple_expression  go to state 23
+    term               go to state 24
+    factor             go to state 25
 
 
 State 91
 
-   48 initializer_list: initializer_list COMMA expression .
+   28 iteration_statement: FOR LPAREN . expression_statement expression_statement expression RPAREN statement
 
-    $default  reduce using rule 48 (initializer_list)
+    IDENTIFIER      shift, and go to state 15
+    STRING_LITERAL  shift, and go to state 16
+    NUMBER          shift, and go to state 17
+    FLOAT           shift, and go to state 18
+    SIZEOF          shift, and go to state 19
+    SEMICOLON       shift, and go to state 77
+    LPAREN          shift, and go to state 20
+
+    expression_statement  go to state 97
+    expression            go to state 85
+    function_call         go to state 22
+    simple_expression     go to state 23
+    term                  go to state 24
+    factor                go to state 25
 
 
 State 92
 
-   20 selection_statement: IF LPAREN expression RPAREN statement .
-   21                    | IF LPAREN expression RPAREN statement . ELSE statement
+   29 iteration_statement: WHILE LPAREN . expression RPAREN statement
 
-    ELSE  shift, and go to state 95
+    IDENTIFIER      shift, and go to state 15
+    STRING_LITERAL  shift, and go to state 16
+    NUMBER          shift, and go to state 17
+    FLOAT           shift, and go to state 18
+    SIZEOF          shift, and go to state 19
+    LPAREN          shift, and go to state 20
 
-    $default  reduce using rule 20 (selection_statement)
+    expression         go to state 98
+    function_call      go to state 22
+    simple_expression  go to state 23
+    term               go to state 24
+    factor             go to state 25
 
 
 State 93
 
-   22 iteration_statement: FOR LPAREN expression_statement expression_statement expression . RPAREN statement
+   24 expression_statement: expression SEMICOLON .
 
-    RPAREN  shift, and go to state 96
+    $default  reduce using rule 24 (expression_statement)
 
 
 State 94
 
-   23 iteration_statement: WHILE LPAREN expression RPAREN statement .
+   54 initializer_list: initializer_list COMMA expression .
 
-    $default  reduce using rule 23 (iteration_statement)
+    $default  reduce using rule 54 (initializer_list)
 
 
 State 95
 
-   21 selection_statement: IF LPAREN expression RPAREN statement ELSE . statement
+   30 jump_statement: RETURN expression SEMICOLON .
 
-    IDENTIFIER      shift, and go to state 13
-    STRING_LITERAL  shift, and go to state 14
-    NUMBER          shift, and go to state 15
-    FLOAT           shift, and go to state 16
-    SIZEOF          shift, and go to state 17
-    RETURN          shift, and go to state 52
-    IF              shift, and go to state 53
-    FOR             shift, and go to state 54
-    WHILE           shift, and go to state 55
-    SEMICOLON       shift, and go to state 56
-    LPAREN          shift, and go to state 18
-    LBRACE          shift, and go to state 36
-
-    compound_statement    go to state 57
-    statement             go to state 97
-    expression_statement  go to state 60
-    selection_statement   go to state 61
-    iteration_statement   go to state 62
-    jump_statement        go to state 63
-    expression            go to state 64
-    function_call         go to state 20
-    simple_expression     go to state 21
-    term                  go to state 22
-    factor                go to state 23
+    $default  reduce using rule 30 (jump_statement)
 
 
 State 96
 
-   22 iteration_statement: FOR LPAREN expression_statement expression_statement expression RPAREN . statement
+   26 selection_statement: IF LPAREN expression . RPAREN statement
+   27                    | IF LPAREN expression . RPAREN statement ELSE statement
 
-    IDENTIFIER      shift, and go to state 13
-    STRING_LITERAL  shift, and go to state 14
-    NUMBER          shift, and go to state 15
-    FLOAT           shift, and go to state 16
-    SIZEOF          shift, and go to state 17
-    RETURN          shift, and go to state 52
-    IF              shift, and go to state 53
-    FOR             shift, and go to state 54
-    WHILE           shift, and go to state 55
-    SEMICOLON       shift, and go to state 56
-    LPAREN          shift, and go to state 18
-    LBRACE          shift, and go to state 36
-
-    compound_statement    go to state 57
-    statement             go to state 98
-    expression_statement  go to state 60
-    selection_statement   go to state 61
-    iteration_statement   go to state 62
-    jump_statement        go to state 63
-    expression            go to state 64
-    function_call         go to state 20
-    simple_expression     go to state 21
-    term                  go to state 22
-    factor                go to state 23
+    RPAREN  shift, and go to state 99
 
 
 State 97
 
-   21 selection_statement: IF LPAREN expression RPAREN statement ELSE statement .
+   28 iteration_statement: FOR LPAREN expression_statement . expression_statement expression RPAREN statement
 
-    $default  reduce using rule 21 (selection_statement)
+    IDENTIFIER      shift, and go to state 15
+    STRING_LITERAL  shift, and go to state 16
+    NUMBER          shift, and go to state 17
+    FLOAT           shift, and go to state 18
+    SIZEOF          shift, and go to state 19
+    SEMICOLON       shift, and go to state 77
+    LPAREN          shift, and go to state 20
+
+    expression_statement  go to state 100
+    expression            go to state 85
+    function_call         go to state 22
+    simple_expression     go to state 23
+    term                  go to state 24
+    factor                go to state 25
 
 
 State 98
 
-   22 iteration_statement: FOR LPAREN expression_statement expression_statement expression RPAREN statement .
+   29 iteration_statement: WHILE LPAREN expression . RPAREN statement
 
-    $default  reduce using rule 22 (iteration_statement)
+    RPAREN  shift, and go to state 101
+
+
+State 99
+
+   26 selection_statement: IF LPAREN expression RPAREN . statement
+   27                    | IF LPAREN expression RPAREN . statement ELSE statement
+
+    error           shift, and go to state 72
+    IDENTIFIER      shift, and go to state 15
+    STRING_LITERAL  shift, and go to state 16
+    NUMBER          shift, and go to state 17
+    FLOAT           shift, and go to state 18
+    SIZEOF          shift, and go to state 19
+    RETURN          shift, and go to state 73
+    IF              shift, and go to state 74
+    FOR             shift, and go to state 75
+    WHILE           shift, and go to state 76
+    SEMICOLON       shift, and go to state 77
+    LPAREN          shift, and go to state 20
+    LBRACE          shift, and go to state 57
+
+    compound_statement    go to state 79
+    statement             go to state 102
+    expression_statement  go to state 81
+    selection_statement   go to state 82
+    iteration_statement   go to state 83
+    jump_statement        go to state 84
+    expression            go to state 85
+    function_call         go to state 22
+    simple_expression     go to state 23
+    term                  go to state 24
+    factor                go to state 25
+
+
+State 100
+
+   28 iteration_statement: FOR LPAREN expression_statement expression_statement . expression RPAREN statement
+
+    IDENTIFIER      shift, and go to state 15
+    STRING_LITERAL  shift, and go to state 16
+    NUMBER          shift, and go to state 17
+    FLOAT           shift, and go to state 18
+    SIZEOF          shift, and go to state 19
+    LPAREN          shift, and go to state 20
+
+    expression         go to state 103
+    function_call      go to state 22
+    simple_expression  go to state 23
+    term               go to state 24
+    factor             go to state 25
+
+
+State 101
+
+   29 iteration_statement: WHILE LPAREN expression RPAREN . statement
+
+    error           shift, and go to state 72
+    IDENTIFIER      shift, and go to state 15
+    STRING_LITERAL  shift, and go to state 16
+    NUMBER          shift, and go to state 17
+    FLOAT           shift, and go to state 18
+    SIZEOF          shift, and go to state 19
+    RETURN          shift, and go to state 73
+    IF              shift, and go to state 74
+    FOR             shift, and go to state 75
+    WHILE           shift, and go to state 76
+    SEMICOLON       shift, and go to state 77
+    LPAREN          shift, and go to state 20
+    LBRACE          shift, and go to state 57
+
+    compound_statement    go to state 79
+    statement             go to state 104
+    expression_statement  go to state 81
+    selection_statement   go to state 82
+    iteration_statement   go to state 83
+    jump_statement        go to state 84
+    expression            go to state 85
+    function_call         go to state 22
+    simple_expression     go to state 23
+    term                  go to state 24
+    factor                go to state 25
+
+
+State 102
+
+   26 selection_statement: IF LPAREN expression RPAREN statement .
+   27                    | IF LPAREN expression RPAREN statement . ELSE statement
+
+    ELSE  shift, and go to state 105
+
+    $default  reduce using rule 26 (selection_statement)
+
+
+State 103
+
+   28 iteration_statement: FOR LPAREN expression_statement expression_statement expression . RPAREN statement
+
+    RPAREN  shift, and go to state 106
+
+
+State 104
+
+   29 iteration_statement: WHILE LPAREN expression RPAREN statement .
+
+    $default  reduce using rule 29 (iteration_statement)
+
+
+State 105
+
+   27 selection_statement: IF LPAREN expression RPAREN statement ELSE . statement
+
+    error           shift, and go to state 72
+    IDENTIFIER      shift, and go to state 15
+    STRING_LITERAL  shift, and go to state 16
+    NUMBER          shift, and go to state 17
+    FLOAT           shift, and go to state 18
+    SIZEOF          shift, and go to state 19
+    RETURN          shift, and go to state 73
+    IF              shift, and go to state 74
+    FOR             shift, and go to state 75
+    WHILE           shift, and go to state 76
+    SEMICOLON       shift, and go to state 77
+    LPAREN          shift, and go to state 20
+    LBRACE          shift, and go to state 57
+
+    compound_statement    go to state 79
+    statement             go to state 107
+    expression_statement  go to state 81
+    selection_statement   go to state 82
+    iteration_statement   go to state 83
+    jump_statement        go to state 84
+    expression            go to state 85
+    function_call         go to state 22
+    simple_expression     go to state 23
+    term                  go to state 24
+    factor                go to state 25
+
+
+State 106
+
+   28 iteration_statement: FOR LPAREN expression_statement expression_statement expression RPAREN . statement
+
+    error           shift, and go to state 72
+    IDENTIFIER      shift, and go to state 15
+    STRING_LITERAL  shift, and go to state 16
+    NUMBER          shift, and go to state 17
+    FLOAT           shift, and go to state 18
+    SIZEOF          shift, and go to state 19
+    RETURN          shift, and go to state 73
+    IF              shift, and go to state 74
+    FOR             shift, and go to state 75
+    WHILE           shift, and go to state 76
+    SEMICOLON       shift, and go to state 77
+    LPAREN          shift, and go to state 20
+    LBRACE          shift, and go to state 57
+
+    compound_statement    go to state 79
+    statement             go to state 108
+    expression_statement  go to state 81
+    selection_statement   go to state 82
+    iteration_statement   go to state 83
+    jump_statement        go to state 84
+    expression            go to state 85
+    function_call         go to state 22
+    simple_expression     go to state 23
+    term                  go to state 24
+    factor                go to state 25
+
+
+State 107
+
+   27 selection_statement: IF LPAREN expression RPAREN statement ELSE statement .
+
+    $default  reduce using rule 27 (selection_statement)
+
+
+State 108
+
+   28 iteration_statement: FOR LPAREN expression_statement expression_statement expression RPAREN statement .
+
+    $default  reduce using rule 28 (iteration_statement)

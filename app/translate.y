@@ -5,139 +5,164 @@
 extern int yylineno;
 int yylex(void);
 void yyerror(const char *s);
-
 %}
+
+%define parse.error verbose
 
 %union {
     int num;
     char *str;
 }
 
-%token <str> IDENTIFIER
-%token <str> STRING_LITERAL
-%token <num> NUMBER
-%token <num> FLOAT
-%token SIZEOF
-%token INT RETURN IF ELSE FOR WHILE PRINTF
-%token EQ NEQ GE LE GT LT ASSIGN PLUS MINUS MULT DIV INC DEC DOT
-%token SEMICOLON COMMA LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET
+/* Tokens */
+%token <str> IDENTIFIER STRING_LITERAL
+%token <num> NUMBER FLOAT
+%token SIZEOF INT RETURN IF ELSE FOR WHILE
+/* Treat printf as normal identifier */
+%token EQ NEQ GE LE GT LT ASSIGN PLUS MINUS MULT DIV
+%token INC DEC SEMICOLON COMMA LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET
 
-%start program
-
+/* Precedence and associativity */
+%left PLUS MINUS
+%left MULT DIV
+%nonassoc GT LT GE LE EQ NEQ
+%right ASSIGN
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
 
+%start program
+
 %%
 
-program
-    : declarations {
-        printf("✅ 程式語法分析成功，共 %d 行\n", yylineno);
-    }
-    ;
+program:
+    declarations                { printf("✅ 程式語法分析成功，共 %d 行\n", yylineno); }
+;
 
-declarations
-    : declarations declaration
-    | declaration
-    ;
+declarations:
+    declarations declaration
+  | declaration
+;
 
-declaration
-    : INT IDENTIFIER SEMICOLON
-    | INT IDENTIFIER ASSIGN expression SEMICOLON
-    | INT IDENTIFIER LBRACKET RBRACKET SEMICOLON
-    | INT IDENTIFIER LBRACKET RBRACKET ASSIGN array_initializer SEMICOLON
-    | function_definition
-    ;
+declaration:
+    INT IDENTIFIER SEMICOLON
+  | INT IDENTIFIER ASSIGN expression SEMICOLON
+  | INT IDENTIFIER LBRACKET RBRACKET SEMICOLON
+  | INT IDENTIFIER LBRACKET RBRACKET ASSIGN array_initializer SEMICOLON
+  | function_definition
+  | error SEMICOLON           { yyerror("語法錯誤，已跳過到 ;"); yyerrok; }
+;
 
-function_definition
-    : INT IDENTIFIER LPAREN RPAREN compound_statement
-    ;
+function_definition:
+    INT IDENTIFIER LPAREN parameter_list_opt RPAREN compound_statement
+;
 
-compound_statement
-    : LBRACE statements RBRACE
-    ;
+parameter_list_opt:
+    /* empty */
+  | parameter_list
+;
 
-statements
-    : statements statement
-    | statement
-    ;
+parameter_list:
+    INT IDENTIFIER
+  | parameter_list COMMA INT IDENTIFIER
+;
 
-statement
-    : expression_statement
-    | compound_statement
-    | selection_statement
-    | iteration_statement
-    | jump_statement
-    ;
+compound_statement:
+    LBRACE statements RBRACE
+;
 
-expression_statement
-    : expression SEMICOLON
-    | SEMICOLON
-    ;
+statements:
+    statements statement
+  | /* empty */
+;
 
-selection_statement
-    : IF LPAREN expression RPAREN statement %prec LOWER_THAN_ELSE
-    | IF LPAREN expression RPAREN statement ELSE statement
-    ;
+statement:
+    expression_statement
+  | compound_statement
+  | selection_statement
+  | iteration_statement
+  | jump_statement
+  | error SEMICOLON           { yyerror("語法錯誤，已跳過到 ;"); yyerrok; }
+;
 
-iteration_statement
-    : FOR LPAREN expression_statement expression_statement expression RPAREN statement
-    | WHILE LPAREN expression RPAREN statement
-    ;
+expression_statement:
+    expression SEMICOLON
+  | SEMICOLON
+;
 
-jump_statement
-    : RETURN expression SEMICOLON
-    ;
+selection_statement:
+    IF LPAREN expression RPAREN statement        %prec LOWER_THAN_ELSE
+  | IF LPAREN expression RPAREN statement ELSE statement
+;
 
-expression
-    : IDENTIFIER ASSIGN expression
-    | function_call
-    | simple_expression
-    | SIZEOF LPAREN expression RPAREN
-    ;
+iteration_statement:
+    FOR LPAREN expression_statement expression_statement expression RPAREN statement
+  | WHILE LPAREN expression RPAREN statement
+;
 
-function_call
-    : IDENTIFIER LPAREN argument_list_opt RPAREN
-    ;
+jump_statement:
+    RETURN expression SEMICOLON
+;
 
-simple_expression
-    : simple_expression PLUS term
-    | simple_expression MINUS term
-    | term
-    ;
+expression:
+    IDENTIFIER ASSIGN expression
+  | function_call
+  | simple_expression
+  | SIZEOF LPAREN expression RPAREN
+;
 
-term
-    : term MULT factor
-    | term DIV factor
-    | factor
-    ;
+function_call:
+    IDENTIFIER LPAREN argument_list_opt RPAREN
+;
 
-factor
-    : LPAREN expression RPAREN
-    | IDENTIFIER
-    | IDENTIFIER LBRACKET expression RBRACKET
-    | NUMBER
-    | STRING_LITERAL
-    | FLOAT
-    ;
+simple_expression:
+    simple_expression PLUS term
+  | simple_expression MINUS term
+  | simple_expression EQ term
+  | simple_expression NEQ term
+  | simple_expression GT term
+  | simple_expression LT term
+  | simple_expression GE term
+  | simple_expression LE term
+  | term
+;
 
-argument_list_opt
-    : /* empty */
-    | argument_list
-    ;
+term:
+    term MULT factor
+  | term DIV factor
+  | factor
+;
 
-argument_list
-    : expression
-    | argument_list COMMA expression
-    ;
+factor:
+    LPAREN expression RPAREN
+  | IDENTIFIER
+  | IDENTIFIER INC
+  | IDENTIFIER DEC
+  | INC IDENTIFIER
+  | DEC IDENTIFIER
+  | IDENTIFIER LBRACKET expression RBRACKET
+  | NUMBER
+  | STRING_LITERAL
+  | FLOAT
+;
 
-array_initializer
-    : LBRACE initializer_list RBRACE
-    ;
+argument_list_opt:
+    /* empty */
+  | argument_list
+;
 
-initializer_list
-    : expression
-    | initializer_list COMMA expression
-    ;
+argument_list:
+    expression
+  | argument_list COMMA expression
+;
+
+array_initializer:
+    LBRACE initializer_list RBRACE
+;
+
+initializer_list:
+    expression
+  | initializer_list COMMA expression
+;
 
 %%
 
@@ -145,8 +170,7 @@ void yyerror(const char *s) {
     fprintf(stderr, "❌ 語法錯誤：%s 在第 %d 行\n", s, yylineno);
 }
 
-// 添加 main 函数
 int main() {
-    yyparse();  // 调用解析器
+    yyparse();
     return 0;
 }
