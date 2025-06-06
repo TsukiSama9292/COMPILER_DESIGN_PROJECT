@@ -1,12 +1,11 @@
 x-default-opts: &default-opts
-  restart: always
+  restart: no
   tty: true
   stdin_open: true
   privileged: false
   ipc: private
   
 services:
-  # CONTAINER
   compiler_container:
     <<: *default-opts
     build:

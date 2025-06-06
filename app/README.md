@@ -47,3 +47,9 @@ gcc translate.tab.c lex.yy.c -lfl -o parser
 ./parser < test.c
 ./parser < test_error.c
 ```
+```bash
+bison -d example.y
+flex example.l
+gcc example.tab.c lex.yy.c -lfl -o example
+./example < test.c
+```
