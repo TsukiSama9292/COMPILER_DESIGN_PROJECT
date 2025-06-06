@@ -1,21 +1,23 @@
 int main() {
-    int scores[] = {85, 42, 77, 59, 90, 61, 33, 70, 55, 100};
-    int i;
-    int pass = 0;
-    int fail = 0;
-    int size = 10;
-    printf("Student Scores and Results:\n");
-    for (i = 0; i < size; i++) {
-        if (scores[i] >= 60) {
-            printf("Student %d: %d points, Pass\n", i + 1, scores[i]);
-            pass++;
-        } else {
-            printf("Student %d: %d points, Fail\n", i + 1, scores[i]);
-            fail++;
+    int s1 = 85;
+    int s2 = 90;
+    int s3 = 77;
+
+    int max = s1;
+    int student = 1;
+
+    int i = 2;
+    while (i <= 3) {
+        if (i == 2 && s2 > max) {
+            max = s2;
+            student = 2;
         }
+        if (i == 3 && s3 > max) {
+            max = s3;
+            student = 3;
+        }
+        i++;
     }
-    printf("\nSummary:\n");
-    printf("Number of students passed: %d\n", pass);
-    printf("Number of students failed: %d\n", fail);
+
     return 0;
 }

@@ -95,13 +95,14 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 56 "example.y"
+#line 57 "example.y"
 
-    int    num;
-    char  *str;
-    Expr   expr;
+    int    num;    /* 用來接 NUMBER */
+    double dbl;    /* 用來接 FLOAT (浮點數) */
+    char  *str;    /* 用來接 IDENTIFIER / STRING_LITERAL */
+    struct exprType *EXPRTYPE;   /* 三位址碼的 code + place */
 
-#line 105 "example.tab.h"
+#line 106 "example.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
