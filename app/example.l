@@ -1,67 +1,77 @@
 %{
-#include "example.tab.h"
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+#include "example.tab.h"
 
-extern int yylineno;
 char c;
+
 %}
 
-DIGIT      [0-9]+
-FLOAT      [0-9]+\.[0-9]+
-ID         [a-zA-Z_][a-zA-Z0-9_]*
-STRING     \"([^\"\\]|\\.)*\"
+DIGIT  [0-9]+
+ID [a-zA-Z_][0-9a-zA-Z_]*
+FLOAT [0-9]+[.][0-9]*
+
+ARITHMETIC_OPERATORS ['+' '\-' '*' '/' '^' '%']
+OTHER_CHARACTERS ['=' ';' '(' ')' '{' '}']
+TYPES ["int" "float" "long" "char" "double"]
 
 %%
+[ \t] ;
+[\n] ;
 
-[ \t\r]+            ;   // 忽略空白
-\n                  { yylineno++; }
 
-"if"                { return IF; }
-"else"              { return ELSE; }
-"for"               { return FOR; }
-"while"             { return WHILE; }
-"sizeof"            { return SIZEOF; }
-"return"            { return RETURN; }
+"if" 	{ return (IF); }
+"else" 	{ return (ELSE); }
+"while"	{ return (WHILE); }
 
-"int"               { return TYPES; }
-"float"             { return TYPES; }
-"long"              { return TYPES; }
-"char"              { return TYPES; }
-"double"            { return TYPES; }
+"int"	{ return (TYPES); }
+"float"	{ return (TYPES); }
+"long"	{ return (TYPES); }
+"char"	{ return (TYPES); }
+"double"	{ return (TYPES); }
 
-"=="                { return EQ; }
-"!="                { return NEQ; }
-">="                { return GE; }
-"<="                { return LE; }
-">"                 { return GT; }
-"<"                 { return LT; }
+">"	{yylval.sval = strdup(yytext);
+		return (REL_OPT);}
+"<"	{yylval.sval = strdup(yytext);
+		return (REL_OPT);}
+">="	{yylval.sval = strdup(yytext);
+		return (REL_OPT);}
+"<="	{yylval.sval = strdup(yytext);
+		return (REL_OPT);}
+"!="	{yylval.sval = strdup(yytext);
+		return (REL_OPT);}
+"=="	{yylval.sval = strdup(yytext);
+		return (REL_OPT);}
 
-"="                 { return ASSIGN; }
-"++"                { return INC; }
-"--"                { return DEC; }
-"+"                 { return PLUS; }
-"-"                 { return MINUS; }
-"*"                 { return MULT; }
-"/"                 { return DIV; }
+"||"	{yylval.sval = strdup(yytext);
+		return (OR);}
+"&&"	{yylval.sval = strdup(yytext);
+		return (AND);}
+"!"	{yylval.sval = strdup(yytext);
+		return (NOT);}
+"true"	{yylval.sval = strdup(yytext);
+		return (TRUE);}
+"false"	{yylval.sval = strdup(yytext);
+		return (FALSE);}
 
-";"                 { return SEMICOLON; }
-","                 { return COMMA; }
-"("                 { return LPAREN; }
-")"                 { return RPAREN; }
-"{"                 { return LBRACE; }
-"}"                 { return RBRACE; }
-"["                 { return LBRACKET; }
-"]"                 { return RBRACKET; }
+{DIGIT}  { yylval.ival = atoi(yytext);
+	   return DIGIT; }
 
-{FLOAT}             { yylval.dbl = atof(yytext); return FLOAT; }
-{DIGIT}             { yylval.num = atoi(yytext); return NUMBER; }
-{STRING}            { yylval.str = strdup(yytext); return STRING_LITERAL; }
-{ID}                { yylval.str = strdup(yytext); return IDENTIFIER; }
+{FLOAT}  { yylval.fval = atof(yytext);
+	   return FLOAT; }
 
-"#"                 ;   // 忽略 preprocessor 的 #
-.                   { printf("非法字元: %s (第 %d 行)\n", yytext, yylineno); }
+{ID} {
+	    yylval.sval = strdup(yytext);
+	    return ID; 
+}
+{ARITHMETIC_OPERATORS}   {
+            	c = yytext[0];
+                 return(c);
+              }
+
+{OTHER_CHARACTERS}   {
+                 c = yytext[0];
+                 return(c);
+              }
 
 %%
-int yywrap() { return 1; }

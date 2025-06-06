@@ -1,0 +1,1213 @@
+State 13 conflicts: 4 reduce/reduce
+State 15 conflicts: 3 shift/reduce
+State 28 conflicts: 1 shift/reduce
+State 29 conflicts: 3 shift/reduce
+
+
+Grammar
+
+    0 $accept: startSym $end
+
+    1 startSym: program
+
+    2 program: function_def
+    3        | program construct
+    4        | construct
+    5        | list
+
+    6 function_def: TYPES ID '(' ')' block
+
+    7 construct: block
+    8          | WHILE '(' bool ')' block
+    9          | IF '(' bool ')' block
+   10          | IF '(' bool ')' block ELSE block
+
+   11 block: '{' list '}'
+   12      | '{' construct '}'
+   13      | '{' block construct '}'
+
+   14 list: stat
+   15     | list stat
+   16     | construct
+   17     | list construct
+   18     | list error '\n'
+
+   19 stat: ';'
+   20     | expr ';'
+   21     | dec ';'
+   22     | text '=' expr ';'
+   23     | dec '=' expr ';'
+
+   24 dec: TYPES text
+
+   25 bool: expr REL_OPT expr
+   26     | bool OR bool
+   27     | bool AND bool
+   28     | NOT '(' bool ')'
+   29     | '(' bool ')'
+   30     | TRUE
+   31     | FALSE
+
+   32 expr: '(' expr ')'
+   33     | expr '^' expr
+   34     | expr '*' expr
+   35     | expr '/' expr
+   36     | expr '%' expr
+   37     | expr '+' expr
+   38     | expr '-' expr
+   39     | text
+   40     | number
+
+   41 text: ID
+
+   42 number: DIGIT
+   43       | FLOAT
+
+
+Terminals, with rules where they appear
+
+    $end (0) 0
+    '\n' <sval> (10) 18
+    '%' <sval> (37) 36
+    '(' (40) 6 8 9 10 28 29 32
+    ')' (41) 6 8 9 10 28 29 32
+    '*' <sval> (42) 34
+    '+' <sval> (43) 37
+    '-' <sval> (45) 38
+    '/' <sval> (47) 35
+    ';' <sval> (59) 19 20 21 22 23
+    '=' <sval> (61) 22 23
+    '^' <sval> (94) 33
+    '{' (123) 11 12 13
+    '}' (125) 11 12 13
+    error (256) 18
+    DIGIT <ival> (258) 42
+    FLOAT <fval> (259) 43
+    ID <sval> (260) 6 41
+    IF <sval> (261) 9 10
+    ELSE <sval> (262) 10
+    WHILE <sval> (263) 8
+    TYPES <sval> (264) 6 24
+    REL_OPT <sval> (265) 25
+    OR <sval> (266) 26
+    AND <sval> (267) 27
+    NOT <sval> (268) 28
+    TRUE <sval> (269) 30
+    FALSE <sval> (270) 31
+
+
+Nonterminals, with rules where they appear
+
+    $accept (29)
+        on left: 0
+    startSym <sval> (30)
+        on left: 1
+        on right: 0
+    program <sval> (31)
+        on left: 2 3 4 5
+        on right: 1 3
+    function_def <sval> (32)
+        on left: 6
+        on right: 2
+    construct <sval> (33)
+        on left: 7 8 9 10
+        on right: 3 4 12 13 16 17
+    block <sval> (34)
+        on left: 11 12 13
+        on right: 6 7 8 9 10 13
+    list <sval> (35)
+        on left: 14 15 16 17 18
+        on right: 5 11 15 17 18
+    stat <EXPRTYPE> (36)
+        on left: 19 20 21 22 23
+        on right: 14 15
+    dec <sval> (37)
+        on left: 24
+        on right: 21 23
+    bool <sval> (38)
+        on left: 25 26 27 28 29 30 31
+        on right: 8 9 10 26 27 28 29
+    expr <EXPRTYPE> (39)
+        on left: 32 33 34 35 36 37 38 39 40
+        on right: 20 22 23 25 32 33 34 35 36 37 38
+    text <sval> (40)
+        on left: 41
+        on right: 22 24 39
+    number <sval> (41)
+        on left: 42 43
+        on right: 40
+
+
+State 0
+
+    0 $accept: . startSym $end
+
+    DIGIT  shift, and go to state 1
+    FLOAT  shift, and go to state 2
+    ID     shift, and go to state 3
+    IF     shift, and go to state 4
+    WHILE  shift, and go to state 5
+    TYPES  shift, and go to state 6
+    ';'    shift, and go to state 7
+    '('    shift, and go to state 8
+    '{'    shift, and go to state 9
+
+    startSym      go to state 10
+    program       go to state 11
+    function_def  go to state 12
+    construct     go to state 13
+    block         go to state 14
+    list          go to state 15
+    stat          go to state 16
+    dec           go to state 17
+    expr          go to state 18
+    text          go to state 19
+    number        go to state 20
+
+
+State 1
+
+   42 number: DIGIT .
+
+    $default  reduce using rule 42 (number)
+
+
+State 2
+
+   43 number: FLOAT .
+
+    $default  reduce using rule 43 (number)
+
+
+State 3
+
+   41 text: ID .
+
+    $default  reduce using rule 41 (text)
+
+
+State 4
+
+    9 construct: IF . '(' bool ')' block
+   10          | IF . '(' bool ')' block ELSE block
+
+    '('  shift, and go to state 21
+
+
+State 5
+
+    8 construct: WHILE . '(' bool ')' block
+
+    '('  shift, and go to state 22
+
+
+State 6
+
+    6 function_def: TYPES . ID '(' ')' block
+   24 dec: TYPES . text
+
+    ID  shift, and go to state 23
+
+    text  go to state 24
+
+
+State 7
+
+   19 stat: ';' .
+
+    $default  reduce using rule 19 (stat)
+
+
+State 8
+
+   32 expr: '(' . expr ')'
+
+    DIGIT  shift, and go to state 1
+    FLOAT  shift, and go to state 2
+    ID     shift, and go to state 3
+    '('    shift, and go to state 8
+
+    expr    go to state 25
+    text    go to state 26
+    number  go to state 20
+
+
+State 9
+
+   11 block: '{' . list '}'
+   12      | '{' . construct '}'
+   13      | '{' . block construct '}'
+
+    DIGIT  shift, and go to state 1
+    FLOAT  shift, and go to state 2
+    ID     shift, and go to state 3
+    IF     shift, and go to state 4
+    WHILE  shift, and go to state 5
+    TYPES  shift, and go to state 27
+    ';'    shift, and go to state 7
+    '('    shift, and go to state 8
+    '{'    shift, and go to state 9
+
+    construct  go to state 28
+    block      go to state 29
+    list       go to state 30
+    stat       go to state 16
+    dec        go to state 17
+    expr       go to state 18
+    text       go to state 19
+    number     go to state 20
+
+
+State 10
+
+    0 $accept: startSym . $end
+
+    $end  shift, and go to state 31
+
+
+State 11
+
+    1 startSym: program .
+    3 program: program . construct
+
+    IF     shift, and go to state 4
+    WHILE  shift, and go to state 5
+    '{'    shift, and go to state 9
+
+    $default  reduce using rule 1 (startSym)
+
+    construct  go to state 32
+    block      go to state 14
+
+
+State 12
+
+    2 program: function_def .
+
+    $default  reduce using rule 2 (program)
+
+
+State 13
+
+    4 program: construct .
+   16 list: construct .
+
+    $end      reduce using rule 4 (program)
+    $end      [reduce using rule 16 (list)]
+    IF        reduce using rule 4 (program)
+    IF        [reduce using rule 16 (list)]
+    WHILE     reduce using rule 4 (program)
+    WHILE     [reduce using rule 16 (list)]
+    '{'       reduce using rule 4 (program)
+    '{'       [reduce using rule 16 (list)]
+    $default  reduce using rule 16 (list)
+
+
+State 14
+
+    7 construct: block .
+
+    $default  reduce using rule 7 (construct)
+
+
+State 15
+
+    5 program: list .
+   15 list: list . stat
+   17     | list . construct
+   18     | list . error '\n'
+
+    error  shift, and go to state 33
+    DIGIT  shift, and go to state 1
+    FLOAT  shift, and go to state 2
+    ID     shift, and go to state 3
+    IF     shift, and go to state 4
+    WHILE  shift, and go to state 5
+    TYPES  shift, and go to state 27
+    ';'    shift, and go to state 7
+    '('    shift, and go to state 8
+    '{'    shift, and go to state 9
+
+    $end   reduce using rule 5 (program)
+    IF     [reduce using rule 5 (program)]
+    WHILE  [reduce using rule 5 (program)]
+    '{'    [reduce using rule 5 (program)]
+
+    construct  go to state 34
+    block      go to state 14
+    stat       go to state 35
+    dec        go to state 17
+    expr       go to state 18
+    text       go to state 19
+    number     go to state 20
+
+
+State 16
+
+   14 list: stat .
+
+    $default  reduce using rule 14 (list)
+
+
+State 17
+
+   21 stat: dec . ';'
+   23     | dec . '=' expr ';'
+
+    '='  shift, and go to state 36
+    ';'  shift, and go to state 37
+
+
+State 18
+
+   20 stat: expr . ';'
+   33 expr: expr . '^' expr
+   34     | expr . '*' expr
+   35     | expr . '/' expr
+   36     | expr . '%' expr
+   37     | expr . '+' expr
+   38     | expr . '-' expr
+
+    '+'  shift, and go to state 38
+    '-'  shift, and go to state 39
+    '*'  shift, and go to state 40
+    '/'  shift, and go to state 41
+    '^'  shift, and go to state 42
+    '%'  shift, and go to state 43
+    ';'  shift, and go to state 44
+
+
+State 19
+
+   22 stat: text . '=' expr ';'
+   39 expr: text .
+
+    '='  shift, and go to state 45
+
+    $default  reduce using rule 39 (expr)
+
+
+State 20
+
+   40 expr: number .
+
+    $default  reduce using rule 40 (expr)
+
+
+State 21
+
+    9 construct: IF '(' . bool ')' block
+   10          | IF '(' . bool ')' block ELSE block
+
+    DIGIT  shift, and go to state 1
+    FLOAT  shift, and go to state 2
+    ID     shift, and go to state 3
+    NOT    shift, and go to state 46
+    TRUE   shift, and go to state 47
+    FALSE  shift, and go to state 48
+    '('    shift, and go to state 49
+
+    bool    go to state 50
+    expr    go to state 51
+    text    go to state 26
+    number  go to state 20
+
+
+State 22
+
+    8 construct: WHILE '(' . bool ')' block
+
+    DIGIT  shift, and go to state 1
+    FLOAT  shift, and go to state 2
+    ID     shift, and go to state 3
+    NOT    shift, and go to state 46
+    TRUE   shift, and go to state 47
+    FALSE  shift, and go to state 48
+    '('    shift, and go to state 49
+
+    bool    go to state 52
+    expr    go to state 51
+    text    go to state 26
+    number  go to state 20
+
+
+State 23
+
+    6 function_def: TYPES ID . '(' ')' block
+   41 text: ID .
+
+    '('  shift, and go to state 53
+
+    $default  reduce using rule 41 (text)
+
+
+State 24
+
+   24 dec: TYPES text .
+
+    $default  reduce using rule 24 (dec)
+
+
+State 25
+
+   32 expr: '(' expr . ')'
+   33     | expr . '^' expr
+   34     | expr . '*' expr
+   35     | expr . '/' expr
+   36     | expr . '%' expr
+   37     | expr . '+' expr
+   38     | expr . '-' expr
+
+    '+'  shift, and go to state 38
+    '-'  shift, and go to state 39
+    '*'  shift, and go to state 40
+    '/'  shift, and go to state 41
+    '^'  shift, and go to state 42
+    '%'  shift, and go to state 43
+    ')'  shift, and go to state 54
+
+
+State 26
+
+   39 expr: text .
+
+    $default  reduce using rule 39 (expr)
+
+
+State 27
+
+   24 dec: TYPES . text
+
+    ID  shift, and go to state 3
+
+    text  go to state 24
+
+
+State 28
+
+   12 block: '{' construct . '}'
+   16 list: construct .
+
+    '}'  shift, and go to state 55
+
+    '}'       [reduce using rule 16 (list)]
+    $default  reduce using rule 16 (list)
+
+
+State 29
+
+    7 construct: block .
+   13 block: '{' block . construct '}'
+
+    IF     shift, and go to state 4
+    WHILE  shift, and go to state 5
+    '{'    shift, and go to state 9
+
+    IF        [reduce using rule 7 (construct)]
+    WHILE     [reduce using rule 7 (construct)]
+    '{'       [reduce using rule 7 (construct)]
+    $default  reduce using rule 7 (construct)
+
+    construct  go to state 56
+    block      go to state 14
+
+
+State 30
+
+   11 block: '{' list . '}'
+   15 list: list . stat
+   17     | list . construct
+   18     | list . error '\n'
+
+    error  shift, and go to state 33
+    DIGIT  shift, and go to state 1
+    FLOAT  shift, and go to state 2
+    ID     shift, and go to state 3
+    IF     shift, and go to state 4
+    WHILE  shift, and go to state 5
+    TYPES  shift, and go to state 27
+    ';'    shift, and go to state 7
+    '('    shift, and go to state 8
+    '{'    shift, and go to state 9
+    '}'    shift, and go to state 57
+
+    construct  go to state 34
+    block      go to state 14
+    stat       go to state 35
+    dec        go to state 17
+    expr       go to state 18
+    text       go to state 19
+    number     go to state 20
+
+
+State 31
+
+    0 $accept: startSym $end .
+
+    $default  accept
+
+
+State 32
+
+    3 program: program construct .
+
+    $default  reduce using rule 3 (program)
+
+
+State 33
+
+   18 list: list error . '\n'
+
+    '\n'  shift, and go to state 58
+
+
+State 34
+
+   17 list: list construct .
+
+    $default  reduce using rule 17 (list)
+
+
+State 35
+
+   15 list: list stat .
+
+    $default  reduce using rule 15 (list)
+
+
+State 36
+
+   23 stat: dec '=' . expr ';'
+
+    DIGIT  shift, and go to state 1
+    FLOAT  shift, and go to state 2
+    ID     shift, and go to state 3
+    '('    shift, and go to state 8
+
+    expr    go to state 59
+    text    go to state 26
+    number  go to state 20
+
+
+State 37
+
+   21 stat: dec ';' .
+
+    $default  reduce using rule 21 (stat)
+
+
+State 38
+
+   37 expr: expr '+' . expr
+
+    DIGIT  shift, and go to state 1
+    FLOAT  shift, and go to state 2
+    ID     shift, and go to state 3
+    '('    shift, and go to state 8
+
+    expr    go to state 60
+    text    go to state 26
+    number  go to state 20
+
+
+State 39
+
+   38 expr: expr '-' . expr
+
+    DIGIT  shift, and go to state 1
+    FLOAT  shift, and go to state 2
+    ID     shift, and go to state 3
+    '('    shift, and go to state 8
+
+    expr    go to state 61
+    text    go to state 26
+    number  go to state 20
+
+
+State 40
+
+   34 expr: expr '*' . expr
+
+    DIGIT  shift, and go to state 1
+    FLOAT  shift, and go to state 2
+    ID     shift, and go to state 3
+    '('    shift, and go to state 8
+
+    expr    go to state 62
+    text    go to state 26
+    number  go to state 20
+
+
+State 41
+
+   35 expr: expr '/' . expr
+
+    DIGIT  shift, and go to state 1
+    FLOAT  shift, and go to state 2
+    ID     shift, and go to state 3
+    '('    shift, and go to state 8
+
+    expr    go to state 63
+    text    go to state 26
+    number  go to state 20
+
+
+State 42
+
+   33 expr: expr '^' . expr
+
+    DIGIT  shift, and go to state 1
+    FLOAT  shift, and go to state 2
+    ID     shift, and go to state 3
+    '('    shift, and go to state 8
+
+    expr    go to state 64
+    text    go to state 26
+    number  go to state 20
+
+
+State 43
+
+   36 expr: expr '%' . expr
+
+    DIGIT  shift, and go to state 1
+    FLOAT  shift, and go to state 2
+    ID     shift, and go to state 3
+    '('    shift, and go to state 8
+
+    expr    go to state 65
+    text    go to state 26
+    number  go to state 20
+
+
+State 44
+
+   20 stat: expr ';' .
+
+    $default  reduce using rule 20 (stat)
+
+
+State 45
+
+   22 stat: text '=' . expr ';'
+
+    DIGIT  shift, and go to state 1
+    FLOAT  shift, and go to state 2
+    ID     shift, and go to state 3
+    '('    shift, and go to state 8
+
+    expr    go to state 66
+    text    go to state 26
+    number  go to state 20
+
+
+State 46
+
+   28 bool: NOT . '(' bool ')'
+
+    '('  shift, and go to state 67
+
+
+State 47
+
+   30 bool: TRUE .
+
+    $default  reduce using rule 30 (bool)
+
+
+State 48
+
+   31 bool: FALSE .
+
+    $default  reduce using rule 31 (bool)
+
+
+State 49
+
+   29 bool: '(' . bool ')'
+   32 expr: '(' . expr ')'
+
+    DIGIT  shift, and go to state 1
+    FLOAT  shift, and go to state 2
+    ID     shift, and go to state 3
+    NOT    shift, and go to state 46
+    TRUE   shift, and go to state 47
+    FALSE  shift, and go to state 48
+    '('    shift, and go to state 49
+
+    bool    go to state 68
+    expr    go to state 69
+    text    go to state 26
+    number  go to state 20
+
+
+State 50
+
+    9 construct: IF '(' bool . ')' block
+   10          | IF '(' bool . ')' block ELSE block
+   26 bool: bool . OR bool
+   27     | bool . AND bool
+
+    OR   shift, and go to state 70
+    AND  shift, and go to state 71
+    ')'  shift, and go to state 72
+
+
+State 51
+
+   25 bool: expr . REL_OPT expr
+   33 expr: expr . '^' expr
+   34     | expr . '*' expr
+   35     | expr . '/' expr
+   36     | expr . '%' expr
+   37     | expr . '+' expr
+   38     | expr . '-' expr
+
+    REL_OPT  shift, and go to state 73
+    '+'      shift, and go to state 38
+    '-'      shift, and go to state 39
+    '*'      shift, and go to state 40
+    '/'      shift, and go to state 41
+    '^'      shift, and go to state 42
+    '%'      shift, and go to state 43
+
+
+State 52
+
+    8 construct: WHILE '(' bool . ')' block
+   26 bool: bool . OR bool
+   27     | bool . AND bool
+
+    OR   shift, and go to state 70
+    AND  shift, and go to state 71
+    ')'  shift, and go to state 74
+
+
+State 53
+
+    6 function_def: TYPES ID '(' . ')' block
+
+    ')'  shift, and go to state 75
+
+
+State 54
+
+   32 expr: '(' expr ')' .
+
+    $default  reduce using rule 32 (expr)
+
+
+State 55
+
+   12 block: '{' construct '}' .
+
+    $default  reduce using rule 12 (block)
+
+
+State 56
+
+   13 block: '{' block construct . '}'
+
+    '}'  shift, and go to state 76
+
+
+State 57
+
+   11 block: '{' list '}' .
+
+    $default  reduce using rule 11 (block)
+
+
+State 58
+
+   18 list: list error '\n' .
+
+    $default  reduce using rule 18 (list)
+
+
+State 59
+
+   23 stat: dec '=' expr . ';'
+   33 expr: expr . '^' expr
+   34     | expr . '*' expr
+   35     | expr . '/' expr
+   36     | expr . '%' expr
+   37     | expr . '+' expr
+   38     | expr . '-' expr
+
+    '+'  shift, and go to state 38
+    '-'  shift, and go to state 39
+    '*'  shift, and go to state 40
+    '/'  shift, and go to state 41
+    '^'  shift, and go to state 42
+    '%'  shift, and go to state 43
+    ';'  shift, and go to state 77
+
+
+State 60
+
+   33 expr: expr . '^' expr
+   34     | expr . '*' expr
+   35     | expr . '/' expr
+   36     | expr . '%' expr
+   37     | expr . '+' expr
+   37     | expr '+' expr .
+   38     | expr . '-' expr
+
+    '*'  shift, and go to state 40
+    '/'  shift, and go to state 41
+    '^'  shift, and go to state 42
+    '%'  shift, and go to state 43
+
+    $default  reduce using rule 37 (expr)
+
+
+State 61
+
+   33 expr: expr . '^' expr
+   34     | expr . '*' expr
+   35     | expr . '/' expr
+   36     | expr . '%' expr
+   37     | expr . '+' expr
+   38     | expr . '-' expr
+   38     | expr '-' expr .
+
+    '*'  shift, and go to state 40
+    '/'  shift, and go to state 41
+    '^'  shift, and go to state 42
+    '%'  shift, and go to state 43
+
+    $default  reduce using rule 38 (expr)
+
+
+State 62
+
+   33 expr: expr . '^' expr
+   34     | expr . '*' expr
+   34     | expr '*' expr .
+   35     | expr . '/' expr
+   36     | expr . '%' expr
+   37     | expr . '+' expr
+   38     | expr . '-' expr
+
+    '^'  shift, and go to state 42
+
+    $default  reduce using rule 34 (expr)
+
+
+State 63
+
+   33 expr: expr . '^' expr
+   34     | expr . '*' expr
+   35     | expr . '/' expr
+   35     | expr '/' expr .
+   36     | expr . '%' expr
+   37     | expr . '+' expr
+   38     | expr . '-' expr
+
+    '^'  shift, and go to state 42
+
+    $default  reduce using rule 35 (expr)
+
+
+State 64
+
+   33 expr: expr . '^' expr
+   33     | expr '^' expr .
+   34     | expr . '*' expr
+   35     | expr . '/' expr
+   36     | expr . '%' expr
+   37     | expr . '+' expr
+   38     | expr . '-' expr
+
+    '^'  shift, and go to state 42
+
+    $default  reduce using rule 33 (expr)
+
+
+State 65
+
+   33 expr: expr . '^' expr
+   34     | expr . '*' expr
+   35     | expr . '/' expr
+   36     | expr . '%' expr
+   36     | expr '%' expr .
+   37     | expr . '+' expr
+   38     | expr . '-' expr
+
+    '^'  shift, and go to state 42
+
+    $default  reduce using rule 36 (expr)
+
+
+State 66
+
+   22 stat: text '=' expr . ';'
+   33 expr: expr . '^' expr
+   34     | expr . '*' expr
+   35     | expr . '/' expr
+   36     | expr . '%' expr
+   37     | expr . '+' expr
+   38     | expr . '-' expr
+
+    '+'  shift, and go to state 38
+    '-'  shift, and go to state 39
+    '*'  shift, and go to state 40
+    '/'  shift, and go to state 41
+    '^'  shift, and go to state 42
+    '%'  shift, and go to state 43
+    ';'  shift, and go to state 78
+
+
+State 67
+
+   28 bool: NOT '(' . bool ')'
+
+    DIGIT  shift, and go to state 1
+    FLOAT  shift, and go to state 2
+    ID     shift, and go to state 3
+    NOT    shift, and go to state 46
+    TRUE   shift, and go to state 47
+    FALSE  shift, and go to state 48
+    '('    shift, and go to state 49
+
+    bool    go to state 79
+    expr    go to state 51
+    text    go to state 26
+    number  go to state 20
+
+
+State 68
+
+   26 bool: bool . OR bool
+   27     | bool . AND bool
+   29     | '(' bool . ')'
+
+    OR   shift, and go to state 70
+    AND  shift, and go to state 71
+    ')'  shift, and go to state 80
+
+
+State 69
+
+   25 bool: expr . REL_OPT expr
+   32 expr: '(' expr . ')'
+   33     | expr . '^' expr
+   34     | expr . '*' expr
+   35     | expr . '/' expr
+   36     | expr . '%' expr
+   37     | expr . '+' expr
+   38     | expr . '-' expr
+
+    REL_OPT  shift, and go to state 73
+    '+'      shift, and go to state 38
+    '-'      shift, and go to state 39
+    '*'      shift, and go to state 40
+    '/'      shift, and go to state 41
+    '^'      shift, and go to state 42
+    '%'      shift, and go to state 43
+    ')'      shift, and go to state 54
+
+
+State 70
+
+   26 bool: bool OR . bool
+
+    DIGIT  shift, and go to state 1
+    FLOAT  shift, and go to state 2
+    ID     shift, and go to state 3
+    NOT    shift, and go to state 46
+    TRUE   shift, and go to state 47
+    FALSE  shift, and go to state 48
+    '('    shift, and go to state 49
+
+    bool    go to state 81
+    expr    go to state 51
+    text    go to state 26
+    number  go to state 20
+
+
+State 71
+
+   27 bool: bool AND . bool
+
+    DIGIT  shift, and go to state 1
+    FLOAT  shift, and go to state 2
+    ID     shift, and go to state 3
+    NOT    shift, and go to state 46
+    TRUE   shift, and go to state 47
+    FALSE  shift, and go to state 48
+    '('    shift, and go to state 49
+
+    bool    go to state 82
+    expr    go to state 51
+    text    go to state 26
+    number  go to state 20
+
+
+State 72
+
+    9 construct: IF '(' bool ')' . block
+   10          | IF '(' bool ')' . block ELSE block
+
+    '{'  shift, and go to state 9
+
+    block  go to state 83
+
+
+State 73
+
+   25 bool: expr REL_OPT . expr
+
+    DIGIT  shift, and go to state 1
+    FLOAT  shift, and go to state 2
+    ID     shift, and go to state 3
+    '('    shift, and go to state 8
+
+    expr    go to state 84
+    text    go to state 26
+    number  go to state 20
+
+
+State 74
+
+    8 construct: WHILE '(' bool ')' . block
+
+    '{'  shift, and go to state 9
+
+    block  go to state 85
+
+
+State 75
+
+    6 function_def: TYPES ID '(' ')' . block
+
+    '{'  shift, and go to state 9
+
+    block  go to state 86
+
+
+State 76
+
+   13 block: '{' block construct '}' .
+
+    $default  reduce using rule 13 (block)
+
+
+State 77
+
+   23 stat: dec '=' expr ';' .
+
+    $default  reduce using rule 23 (stat)
+
+
+State 78
+
+   22 stat: text '=' expr ';' .
+
+    $default  reduce using rule 22 (stat)
+
+
+State 79
+
+   26 bool: bool . OR bool
+   27     | bool . AND bool
+   28     | NOT '(' bool . ')'
+
+    OR   shift, and go to state 70
+    AND  shift, and go to state 71
+    ')'  shift, and go to state 87
+
+
+State 80
+
+   29 bool: '(' bool ')' .
+
+    $default  reduce using rule 29 (bool)
+
+
+State 81
+
+   26 bool: bool . OR bool
+   26     | bool OR bool .
+   27     | bool . AND bool
+
+    AND  shift, and go to state 71
+
+    $default  reduce using rule 26 (bool)
+
+
+State 82
+
+   26 bool: bool . OR bool
+   27     | bool . AND bool
+   27     | bool AND bool .
+
+    $default  reduce using rule 27 (bool)
+
+
+State 83
+
+    9 construct: IF '(' bool ')' block .
+   10          | IF '(' bool ')' block . ELSE block
+
+    ELSE  shift, and go to state 88
+
+    $default  reduce using rule 9 (construct)
+
+
+State 84
+
+   25 bool: expr REL_OPT expr .
+   33 expr: expr . '^' expr
+   34     | expr . '*' expr
+   35     | expr . '/' expr
+   36     | expr . '%' expr
+   37     | expr . '+' expr
+   38     | expr . '-' expr
+
+    '+'  shift, and go to state 38
+    '-'  shift, and go to state 39
+    '*'  shift, and go to state 40
+    '/'  shift, and go to state 41
+    '^'  shift, and go to state 42
+    '%'  shift, and go to state 43
+
+    $default  reduce using rule 25 (bool)
+
+
+State 85
+
+    8 construct: WHILE '(' bool ')' block .
+
+    $default  reduce using rule 8 (construct)
+
+
+State 86
+
+    6 function_def: TYPES ID '(' ')' block .
+
+    $default  reduce using rule 6 (function_def)
+
+
+State 87
+
+   28 bool: NOT '(' bool ')' .
+
+    $default  reduce using rule 28 (bool)
+
+
+State 88
+
+   10 construct: IF '(' bool ')' block ELSE . block
+
+    '{'  shift, and go to state 9
+
+    block  go to state 89
+
+
+State 89
+
+   10 construct: IF '(' bool ')' block ELSE block .
+
+    $default  reduce using rule 10 (construct)

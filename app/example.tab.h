@@ -54,39 +54,19 @@ extern int yydebug;
     YYEOF = 0,                     /* "end of file"  */
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
-    IDENTIFIER = 258,              /* IDENTIFIER  */
-    STRING_LITERAL = 259,          /* STRING_LITERAL  */
-    NUMBER = 260,                  /* NUMBER  */
-    FLOAT = 261,                   /* FLOAT  */
-    SIZEOF = 262,                  /* SIZEOF  */
-    INT = 263,                     /* INT  */
-    RETURN = 264,                  /* RETURN  */
-    IF = 265,                      /* IF  */
-    ELSE = 266,                    /* ELSE  */
-    FOR = 267,                     /* FOR  */
-    WHILE = 268,                   /* WHILE  */
-    EQ = 269,                      /* EQ  */
-    NEQ = 270,                     /* NEQ  */
-    GE = 271,                      /* GE  */
-    LE = 272,                      /* LE  */
-    GT = 273,                      /* GT  */
-    LT = 274,                      /* LT  */
-    ASSIGN = 275,                  /* ASSIGN  */
-    PLUS = 276,                    /* PLUS  */
-    MINUS = 277,                   /* MINUS  */
-    MULT = 278,                    /* MULT  */
-    DIV = 279,                     /* DIV  */
-    INC = 280,                     /* INC  */
-    DEC = 281,                     /* DEC  */
-    SEMICOLON = 282,               /* SEMICOLON  */
-    COMMA = 283,                   /* COMMA  */
-    LPAREN = 284,                  /* LPAREN  */
-    RPAREN = 285,                  /* RPAREN  */
-    LBRACE = 286,                  /* LBRACE  */
-    RBRACE = 287,                  /* RBRACE  */
-    LBRACKET = 288,                /* LBRACKET  */
-    RBRACKET = 289,                /* RBRACKET  */
-    LOWER_THAN_ELSE = 290          /* LOWER_THAN_ELSE  */
+    DIGIT = 258,                   /* DIGIT  */
+    FLOAT = 259,                   /* FLOAT  */
+    ID = 260,                      /* ID  */
+    IF = 261,                      /* IF  */
+    ELSE = 262,                    /* ELSE  */
+    WHILE = 263,                   /* WHILE  */
+    TYPES = 264,                   /* TYPES  */
+    REL_OPT = 265,                 /* REL_OPT  */
+    OR = 266,                      /* OR  */
+    AND = 267,                     /* AND  */
+    NOT = 268,                     /* NOT  */
+    TRUE = 269,                    /* TRUE  */
+    FALSE = 270                    /* FALSE  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -95,14 +75,14 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 57 "example.y"
+#line 65 "example.y"
 
-    int    num;    /* 用來接 NUMBER */
-    double dbl;    /* 用來接 FLOAT (浮點數) */
-    char  *str;    /* 用來接 IDENTIFIER / STRING_LITERAL */
-    struct exprType *EXPRTYPE;   /* 三位址碼的 code + place */
+	int ival;
+	float fval;
+	char *sval;
+	struct exprType *EXPRTYPE;
 
-#line 106 "example.tab.h"
+#line 86 "example.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

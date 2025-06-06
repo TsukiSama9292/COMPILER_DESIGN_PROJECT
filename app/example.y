@@ -1,904 +1,973 @@
 %{
 #include <stdio.h>
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
-extern int yylineno;
-int yylex(void);
-void yyerror(const char *s);
 
-/* Expr 結構：code = 這個節點產生的 TAC，place = 運算式結果暫存器 */
-struct exprType {
-    char *code;
-    char *place;
+int yylex(void);
+void yyerror(const char *);
+
+
+struct exprType{
+
+	char *addr;
+	char *code;
+	
 };
 
-/* Helper：產生新的暫存器名稱 (t0, t1, ...) */
-static int temp_count = 0;
-char *newTemp() {
-    char buf[32];
-    sprintf(buf, "t%d", temp_count++);
-    return strdup(buf);
+int n=1;
+int nl = 1;
+char *var;
+char num_to_concatinate[10];
+char num_to_concatinate_l[10];
+char *ret;
+char *temp;
+
+char *label;
+char *label2;
+char *check;
+
+char *begin;
+
+char *b1;
+char *b2;
+
+char *s1;
+char *s2;
+
+struct exprType *to_return_expr;
+
+char * newTemp(){
+	
+	char *newTemp = (char *)malloc(20);
+	strcpy(newTemp,"t");
+	snprintf(num_to_concatinate, 10,"%d",n);
+	strcat(newTemp,num_to_concatinate);
+		
+	n++;
+	return newTemp;
 }
 
-/* Helper：產生新的標籤 (L0, L1, ...) */
-static int label_count = 0;
-char *newLabel() {
-    char buf[32];
-    sprintf(buf, "L%d", label_count++);
-    return strdup(buf);
+char * newLabel(){
+	
+	char *newLabel = (char *)malloc(20);
+	strcpy(newLabel,"L");
+	snprintf(num_to_concatinate_l, 10,"%d",nl);
+	strcat(newLabel,num_to_concatinate_l);
+		
+	nl++;
+	return newLabel;
 }
-
-/* 串接兩段 TAC，並自動在中間加換行 */
-char *concatCode(const char *a, const char *b) {
-    size_t la = a ? strlen(a) : 0;
-    size_t lb = b ? strlen(b) : 0;
-    char *res = malloc(la + lb + 2);
-    if (a) strcpy(res, a);
-    else    res[0] = '\0';
-    if (b)  strcat(res, b);
-    strcat(res, "\n");
-    return res;
-}
-
-/* 串接三段 TAC (a + b + c)，中間都加換行 */
-char *concat3(const char *a, const char *b, const char *c) {
-    char *tmp = concatCode(a, b);
-    char *res = concatCode(tmp, c);
-    free(tmp);
-    return res;
-}
-
-
 %}
 
-%define parse.error verbose
+%start startSym
 
-/*=== Token、union 與 非終結式型別 宣告 ===*/
 %union {
-    int    num;    /* 用來接 NUMBER */
-    double dbl;    /* 用來接 FLOAT (浮點數) */
-    char  *str;    /* 用來接 IDENTIFIER / STRING_LITERAL */
-    struct exprType *EXPRTYPE;   /* 三位址碼的 code + place */
+	int ival;
+	float fval;
+	char *sval;
+	struct exprType *EXPRTYPE;
 }
+%token <ival> DIGIT
+%token <fval> FLOAT
+%token <sval> ID IF ELSE WHILE TYPES REL_OPT OR AND NOT TRUE FALSE
+%token <sval> '+' '-' '*' '/' '^' '%' '\n' '=' ';'
 
-/* Token */
-%token <str> IDENTIFIER STRING_LITERAL
-%token <num> NUMBER
-%token <dbl> FLOAT
-%token SIZEOF INT RETURN IF ELSE FOR WHILE
-%token EQ NEQ GE LE GT LT ASSIGN PLUS MINUS MULT DIV
-%token INC DEC SEMICOLON COMMA LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET
+%type <sval> list text number construct block dec bool program startSym function_def
+%type <EXPRTYPE> expr stat
 
-/* 指定哪些 nonterminal 用哪種型別 */
-%type <EXPRTYPE> program declarations declaration
-%type <EXPRTYPE> function_definition parameter_list_opt parameter_list
-%type <EXPRTYPE> compound_statement statements statement
-%type <EXPRTYPE> expression_statement selection_statement iteration_statement jump_statement
-%type <EXPRTYPE> expression simple_expression term factor function_call argument_list_opt argument_list
-%type <EXPRTYPE> array_initializer initializer_list
-
-/* Precedence & Associativity */
-%left PLUS MINUS
-%left MULT DIV
-%nonassoc GT LT GE LE EQ NEQ
-%right ASSIGN
-%nonassoc LOWER_THAN_ELSE
-%nonassoc ELSE
-
-%start program
+%left OR
+%left AND
+%left NOT
+%left REL_OPT
+%right '='
+%left '+' '-'
+%left '*' '/' '%'
+%right '^'
 
 %%
 
-/*======================================================
-  program: 最外層，把所有 declarations 累積起來印出
-======================================================*/
-program:
-    declarations {
-        /* 印出整段 TAC */
-        printf("%s", $1->code ? $1->code : "");
-        printf("✅ 程式語法分析成功，共 %d 行\n", yylineno);
-        free($1->code);
-    }
-;
+startSym:	program
+		{
+			s1 = $1;
+			label = newLabel();
 
-/*======================================================
-  declarations: 多個 declaration 串起來
-  $$->code = 先印左邊，再印右邊
-======================================================*/
-declarations:
-    declarations declaration {
-        $$ = malloc(sizeof(struct exprType));
-        $$ = malloc(sizeof(struct exprType));
-        char *tmp = concatCode($1->code ? $1->code : "", $2->code ? $2->code : "");
-        free($1->code);
-        free($2->code);
-        $$->code = tmp;
-        $$->place = NULL;
-    }
-  | declaration {
-        $$ = malloc(sizeof(struct exprType));
-        $$ = malloc(sizeof(struct exprType));
-        $$->code = $1->code ? strdup($1->code) : strdup("");
-        $$->place = NULL;
-    }
-;
+			check = strstr (s1,"NEXT");
+			
+			while(check!=NULL){
+				strncpy (check,label,strlen(label));
+				strncpy (check+strlen(label),"    ",(4-strlen(label)));
+				check = strstr (s1,"NEXT");
+				}
 
-/*======================================================
-  declaration: 變數宣告、初始化、或函式定義
-======================================================*/
-declaration:
-    INT IDENTIFIER SEMICOLON {
-        /* int x; 不產生 TAC */
-        $$ = malloc(sizeof(struct exprType));
-        $$->code = strdup("");
-        $$->place = NULL;
-    }
-  | INT IDENTIFIER ASSIGN expression SEMICOLON {
-        /* int x = expr; */
-        char *expr_code  = $4->code;
-        char *expr_place = $4->place;
-        char buf[128];
-        sprintf(buf, "%s = %s", $2, expr_place);
-        char *tmp = concatCode(expr_code, buf);
-        $$ = malloc(sizeof(struct exprType));
-        $$->code = tmp;
-        $$->place = NULL;
-        free(expr_code);
-        free(expr_place);
-    }
-  | INT IDENTIFIER LBRACKET RBRACKET SEMICOLON {
-        $$ = malloc(sizeof(struct exprType));
-        /* int arr[]; (暫不實作) */
-        $$->code = strdup("");
-        $$->place = NULL;
-    }
-  | INT IDENTIFIER LBRACKET RBRACKET ASSIGN array_initializer SEMICOLON {
-        $$ = malloc(sizeof(struct exprType));
-        /* int arr[] = { ... }; (暫不實作) */
-        $$->code = strdup("");
-        $$->place = NULL;
-    }
-  | function_definition {
-        $$ = malloc(sizeof(struct exprType));
-        /* 函式定義：直接把 body code 傳上來 */
-        $$->code = $1->code ? strdup($1->code) : strdup("");
-        $$->place = NULL;
-        free($1->code);
-    }
-;
+			ret = (char *)malloc(strlen(s1)+10);
+			ret[0] = 0;
 
-/*======================================================
-  function_definition: int foo(params) { body }
-  $$->code = "foo:" + body_code
-======================================================*/
-function_definition:
-    INT IDENTIFIER LPAREN parameter_list_opt RPAREN compound_statement {
-        $$ = malloc(sizeof(struct exprType));
-        char buf[128];
-        sprintf(buf, "%s:", $2);          /* foo: */
-        char *tmp = concatCode(buf, $6->code);
-        $$->code = tmp;
-        $$->place = NULL;
-        free($6->code);
-    }
-;
+			strcat(ret,s1);
+			strcat(ret,"\n");
+			strcat(ret,label);
+			strcat(ret," : END OF THREE ADDRESS CODE !!!!!\n");
+			
+			printf("\n----------  FINAL THREE ADDRESS CODE ----------\n");
+			puts(ret);
 
-/* parameter_list_opt / parameter_list: 暫不在 TAC 中做事 */
-parameter_list_opt:
-    /* empty */ {
-        $$ = malloc(sizeof(struct exprType));
-        $$->code = strdup("");
-        $$->place = NULL;
-    }
-  | parameter_list {
-        $$ = malloc(sizeof(struct exprType));
-        $$->code = strdup("");
-        $$->place = NULL;
-    }
-;
+			$$ = ret;
+		}
+		;
 
-parameter_list:
-    INT IDENTIFIER {
-        $$ = malloc(sizeof(struct exprType));
-        $$->code = strdup("");
-        $$->place = NULL;
-    }
-  | parameter_list COMMA INT IDENTIFIER {
-        $$ = malloc(sizeof(struct exprType));
-        $$->code = strdup("");
-        $$->place = NULL;
-    }
-;
+program : 	function_def
+        | program construct
+		{
 
-/*======================================================
-  compound_statement: { statements }
-  $$->code = statements->code
-======================================================*/
-compound_statement:
-    LBRACE statements RBRACE {
-        $$ = malloc(sizeof(struct exprType));
-        $$->code  = $2->code ? strdup($2->code) : strdup("");
-        $$->place = NULL;
-        free($2->code);
-    }
-;
+			s1 = $1;
+			s2 = $2;
 
-/*======================================================
-  statements: 多個 statement 串起來
-  $$->code = 左邊 + 右邊
-======================================================*/
-statements:
-    statements statement {
-        $$ = malloc(sizeof(struct exprType));
-        char *tmp = concatCode($1->code ? $1->code : "", $2->code ? $2->code : "");
-        free($1->code);
-        free($2->code);
-        $$->code = tmp;
-        $$->place = NULL;
-    }
-  | /* empty */ {
-        $$ = malloc(sizeof(struct exprType));
-        $$->code = strdup("");
-        $$->place = NULL;
-    }
-;
+			label = newLabel();
 
-/*======================================================
-  statement: 
-    - declaration
-    - expression_statement
-    - compound_statement
-    - selection_statement (if / if-else)
-    - iteration_statement (while + for 簡易)
-    - jump_statement (return)
-======================================================*/
-statement:
-    declaration {
-        $$ = malloc(sizeof(struct exprType));
-        $$->code  = $1->code ? strdup($1->code) : strdup("");
-        $$->place = NULL;
-        free($1->code);
-    }
-  | expression_statement {
-        $$ = malloc(sizeof(struct exprType));
-        $$->code  = $1->code ? strdup($1->code) : strdup("");
-        $$->place = NULL;
-        free($1->code);
-    }
-  | compound_statement {
-        $$->code  = $1->code ? strdup($1->code) : strdup("");
-        $$->place = NULL;
-        free($1->code);
-    }
-  | selection_statement {
-        $$ = malloc(sizeof(struct exprType));
-        $$->code  = $1->code ? strdup($1->code) : strdup("");
-        $$->place = NULL;
-        free($1->code);
-    }
-  | iteration_statement {
-        $$ = malloc(sizeof(struct exprType));
-        $$->code  = $1->code ? strdup($1->code) : strdup("");
-        $$->place = NULL;
-        free($1->code);
-    }
-  | jump_statement {
-        $$ = malloc(sizeof(struct exprType));
-        $$->code  = $1->code ? strdup($1->code) : strdup("");
-        $$->place = NULL;
-        free($1->code);
-    }
-  | error SEMICOLON {
-        $$ = malloc(sizeof(struct exprType));
-        yyerror("語法錯誤");
-        $$->code = strdup("");
-        $$->place = NULL;
-        yyerrok;
-    }
-;
+			check = strstr (s1,"NEXT");
+			
+			while(check!=NULL){
+				strncpy (check,label,strlen(label));
+				strncpy (check+strlen(label),"    ",(4-strlen(label)));
+				check = strstr (s1,"NEXT");
+				}
 
-/*======================================================
-  expression_statement:
-  - expression ;
-  - ;
-  $$->code = expression->code 或空
-======================================================*/
-expression_statement:
-    expression SEMICOLON {
-        $$ = malloc(sizeof(struct exprType));
-        $$->code  = $1->code ? strdup($1->code) : strdup("");
-        $$->place = NULL;
-        free($1->code);
-        free($1->place);
-    }
-  | SEMICOLON {
-        $$ = malloc(sizeof(struct exprType));
-        $$->code = strdup("");
-        $$->place = NULL;
-    }
-;
+			ret = (char *)malloc(strlen($1)+strlen($2)+4);
+			ret[0] = 0;
+			strcat(ret,$1);
+			strcat(ret,"\n");
+			strcat(ret,label);
+			strcat(ret," : ");
+			strcat(ret,$2);
 
-/*======================================================
-  selection_statement: if / if-else
-======================================================*/
-selection_statement:
-    IF LPAREN expression RPAREN statement %prec LOWER_THAN_ELSE {
-        /* if (cond) stmt; */
-        char *label_true  = newLabel();
-        char *label_end   = newLabel();
+			printf("program construct\n");
 
-        char *cond_code  = $3->code;
-        char *cond_place = $3->place;
+			puts(ret);
+			$$ = ret;
+		}
+		|
+		construct
+		{
+			printf("Final Construct \n");
+			puts($1);
+			$$ = $1;
+		}
+		|
+		list
+		{	
+			printf("Final list \n");
+			puts($1);
+			$$ = $1;
+		}
+		;
 
-        /* if cond goto label_true
-           goto label_end
-           label_true: stmt->code
-           label_end: */
-        char buf1[128], buf2[128], buf3[128];
-        sprintf(buf1, "if %s goto %s", cond_place, label_true);
-        sprintf(buf2, "goto %s", label_end);
-        sprintf(buf3, "%s:", label_true);
-
-        /* cond_code + if + goto + label_true + stmt->code + label_end */
-        char *part1 = concat3(cond_code, buf1, buf2);
-        char *part2 = concatCode(part1, buf3);
-        free(part1);
-
-        char *part3 = concatCode(part2, $5->code);
-        free(part2);
-
-        char buf_end[32];
-        sprintf(buf_end, "%s:", label_end);
-        char *whole = concatCode(part3, buf_end);
-        free(part3);
-
-        $$->code  = whole;
-        $$->place = NULL;
-
-        free(cond_code);
-        free(cond_place);
-        free($5->code);
-        free(label_true);
-        free(label_end);
-    }
-  | IF LPAREN expression RPAREN statement ELSE statement {
-        /* if (cond) stmt1; else stmt2; */
-        char *label_true  = newLabel();
-        char *label_false = newLabel();
-        char *label_end   = newLabel();
-
-        char *cond_code  = $3->code;
-        char *cond_place = $3->place;
-
-        char buf1[128], buf2[128];
-        sprintf(buf1, "if %s goto %s", cond_place, label_true);
-        sprintf(buf2, "goto %s", label_false);
-
-        /* cond_code + if + goto label_true + goto label_false */
-        char *tmp1 = concatCode(cond_code, buf1);
-        char *tmp2 = concatCode(tmp1, buf2);
-        free(tmp1);
-
-        /* label_true: stmt1; goto label_end */
-        char buf_lt[32], buf_goto_end[32];
-        sprintf(buf_lt, "%s:", label_true);
-        sprintf(buf_goto_end, "goto %s", label_end);
-
-        char *seg1 = concatCode(buf_lt, $5->code);
-        char *seg2 = concatCode(seg1, buf_goto_end);
-        free(seg1);
-
-        /* label_false: stmt2 */
-        char buf_lf[32];
-        sprintf(buf_lf, "%s:", label_false);
-        char *seg3 = concatCode(buf_lf, $7->code);
-
-        /* label_end: */
-        char buf_le[32];
-        sprintf(buf_le, "%s:", label_end);
-
-        /* 串接所有片段 */
-        char *tmp3 = concatCode(tmp2, seg2);
-        free(tmp2);
-        char *tmp4 = concatCode(tmp3, seg3);
-        free(tmp3);
-        char *whole = concatCode(tmp4, buf_le);
-        free(tmp4);
-
-        $$->code  = whole;
-        $$->place = NULL;
-
-        free(cond_code);
-        free(cond_place);
-        free($5->code);
-        free($7->code);
-        free(label_true);
-        free(label_false);
-        free(label_end);
-    }
-;
-
-/*======================================================
-  iteration_statement: 支援簡易 FOR、完整 WHILE
-======================================================*/
-iteration_statement:
-    FOR LPAREN statement statement expression RPAREN statement {
-        $$ = malloc(sizeof(struct exprType));
-        /* 只是把 init, second, cond, body 的 code 串起來，不做真實 for-loop 轉換 */
-        char *c1 = $3->code ? strdup($3->code) : strdup("");
-        char *c2 = $4->code ? strdup($4->code) : strdup("");
-        char *c3 = $5->code ? strdup($5->code) : strdup("");
-        char *c4 = $7->code ? strdup($7->code) : strdup("");
-
-        char *t12  = concatCode(c1, c2); free(c1); free(c2);
-        char *t123 = concatCode(t12, c3); free(t12); free(c3);
-        char *whole = concatCode(t123, c4); free(t123); free(c4);
-
-        $$->code  = whole;
-        $$->place = NULL;
-    }
-  | WHILE LPAREN expression RPAREN statement {
-        /* while (cond) stmt; 轉成：
-             Lstart:
-               cond_code
-               if cond_place goto Lbody
-               goto Lend
-             Lbody:
-               stmt_code
-               goto Lstart
-             Lend:
-        */
-        char *label_start = newLabel();
-        char *label_body  = newLabel();
-        char *label_end   = newLabel();
-
-        char *cond_code  = $3->code;
-        char *cond_place = $3->place;
-
-        char buf_if[128], buf_goto_end[128];
-        sprintf(buf_if, "if %s goto %s", cond_place, label_body);
-        sprintf(buf_goto_end, "goto %s", label_end);
-
-        /* Lstart: */
-        char buf_ls[32];
-        sprintf(buf_ls, "%s:", label_start);
-        char *part1 = concatCode(buf_ls, cond_code);
-        char *part2 = concatCode(part1, buf_if);
-        free(part1);
-        char *part3 = concatCode(part2, buf_goto_end);
-        free(part2);
-
-        /* Lbody: stmt_code; goto Lstart */
-        char buf_lb[32], buf_gs[32];
-        sprintf(buf_lb, "%s:", label_body);
-        sprintf(buf_gs, "goto %s", label_start);
-
-        /* 這裡原本用錯 $6->code，正確應為 $5->code */
-        char *part4 = concatCode(buf_lb, $5->code);
-        char *part5 = concatCode(part4, buf_gs);
-        free(part4);
-
-        /* Lend: */
-        char buf_le[32];
-        sprintf(buf_le, "%s:", label_end);
-
-        /* 最後串接： part3 + part5 + buf_le */
-        char *tmp1 = concatCode(part3, part5);
-        free(part3);
-        free(part5);
-        char *whole = concatCode(tmp1, buf_le);
-        free(tmp1);
-
-        $$->code  = whole;
-        $$->place = NULL;
-
-        /* 對應地，free 也要改成 $5->code */
-        free(cond_code);
-        free(cond_place);
-        free($5->code);
-        free(label_start);
-        free(label_body);
-        free(label_end);
-    }
-;
-
-/*======================================================
-  jump_statement: return expr;
-  $$->code = expr->code + "return expr->place"
-======================================================*/
-jump_statement:
-    RETURN expression SEMICOLON {
-        char *expr_code  = $2->code;
-        char *expr_place = $2->place;
-        char buf[128];
-        sprintf(buf, "return %s", expr_place);
-        char *whole = concatCode(expr_code, buf);
-        $$->code  = whole;
-        $$->place = NULL;
-        free(expr_code);
-        free(expr_place);
-    }
-;
-
-/*======================================================
-  expression: 
-   - ID = expression
-   - function_call
-   - simple_expression
-   - sizeof(expr)
-======================================================*/
-expression:
-    IDENTIFIER ASSIGN expression {
-        char *rhs_code  = $3->code;
-        char *rhs_place = $3->place;
-        char buf[128];
-        sprintf(buf, "%s = %s", $1, rhs_place);
-        char *whole = concatCode(rhs_code, buf);
-        $$->code  = whole;
-        $$->place = strdup($1);
-        free(rhs_code);
-        free(rhs_place);
-    }
-  | function_call {
-        $$->code  = $1->code ? strdup($1->code) : strdup("");
-        $$->place = $1->place ? strdup($1->place) : NULL;
-        free($1->code);
-        free($1->place);
-    }
-  | simple_expression {
-        $$->code  = $1->code ? strdup($1->code) : strdup("");
-        $$->place = $1->place ? strdup($1->place) : NULL;
-        free($1->code);
-        free($1->place);
-    }
-  | SIZEOF LPAREN expression RPAREN {
-        /* sizeof(E) 示範返回常數 4 */
-        char *expr_code  = $3->code;
-        char *expr_place = $3->place;
-        char *t        = newTemp();
-        char buf[128];
-        sprintf(buf, "%s = 4  /* sizeof(%s) */", t, expr_place);
-        char *whole = concatCode(expr_code, buf);
-        $$->code  = whole;
-        $$->place = strdup(t);
-        free(expr_code);
-        free(expr_place);
-        free(t);
-    }
-;
-
-/*======================================================
-  function_call: ID ( args )
-  回傳 place=newTemp(), code = 所有 args->code + call 指令
-======================================================*/
-function_call:
-    IDENTIFIER LPAREN argument_list_opt RPAREN {
-        char *args_code = $3->code;
-        char *t = newTemp();
-        char buf[128];
-        if ($3->place) {
-            sprintf(buf, "%s = call %s, %s", t, $1, $3->place);
-        } else {
-            sprintf(buf, "%s = call %s", t, $1);
+function_def : TYPES ID '(' ')' block
+        {
+            printf("Function definition: %s\n", $2);
+            $$ = $5; // 直接回傳 block 的內容
         }
-        char *whole = concatCode(args_code, buf);
-        $$->code  = whole;
-        $$->place = strdup(t);
-        free(args_code);
-        free($3->place);
-        free(t);
-    }
-;
+        ;
 
-/*======================================================
-  simple_expression: 加減與比較運算
-======================================================*/
-simple_expression:
-    simple_expression PLUS term {
-        char *t = newTemp();
-        char buf_op[128];
-        sprintf(buf_op, "%s = %s + %s", t, $1->place, $3->place);
-        char *c1 = concat3($1->code, $3->code, buf_op);
-        $$->code  = c1;
-        $$->place = strdup(t);
-        free($1->code); free($1->place);
-        free($3->code); free($3->place);
-        free(t);
-    }
-  | simple_expression MINUS term {
-        char *t = newTemp();
-        char buf_op[128];
-        sprintf(buf_op, "%s = %s - %s", t, $1->place, $3->place);
-        char *c1 = concat3($1->code, $3->code, buf_op);
-        $$->code  = c1;
-        $$->place = strdup(t);
-        free($1->code); free($1->place);
-        free($3->code); free($3->place);
-        free(t);
-    }
-  | simple_expression EQ term {
-        char *t = newTemp();
-        char buf_op[128];
-        sprintf(buf_op, "%s = %s == %s", t, $1->place, $3->place);
-        char *c1 = concat3($1->code, $3->code, buf_op);
-        $$->code  = c1;
-        $$->place = strdup(t);
-        free($1->code); free($1->place);
-        free($3->code); free($3->place);
-        free(t);
-    }
-  | simple_expression NEQ term {
-        char *t = newTemp();
-        char buf_op[128];
-        sprintf(buf_op, "%s = %s != %s", t, $1->place, $3->place);
-        char *c1 = concat3($1->code, $3->code, buf_op);
-        $$->code  = c1;
-        $$->place = strdup(t);
-        free($1->code); free($1->place);
-        free($3->code); free($3->place);
-        free(t);
-    }
-  | simple_expression GT term {
-        char *t = newTemp();
-        char buf_op[128];
-        sprintf(buf_op, "%s = %s > %s", t, $1->place, $3->place);
-        char *c1 = concat3($1->code, $3->code, buf_op);
-        $$->code  = c1;
-        $$->place = strdup(t);
-        free($1->code); free($1->place);
-        free($3->code); free($3->place);
-        free(t);
-    }
-  | simple_expression LT term {
-        char *t = newTemp();
-        char buf_op[128];
-        sprintf(buf_op, "%s = %s < %s", t, $1->place, $3->place);
-        char *c1 = concat3($1->code, $3->code, buf_op);
-        $$->code  = c1;
-        $$->place = strdup(t);
-        free($1->code); free($1->place);
-        free($3->code); free($3->place);
-        free(t);
-    }
-  | simple_expression GE term {
-        char *t = newTemp();
-        char buf_op[128];
-        sprintf(buf_op, "%s = %s >= %s", t, $1->place, $3->place);
-        char *c1 = concat3($1->code, $3->code, buf_op);
-        $$->code  = c1;
-        $$->place = strdup(t);
-        free($1->code); free($1->place);
-        free($3->code); free($3->place);
-        free(t);
-    }
-  | simple_expression LE term {
-        char *t = newTemp();
-        char buf_op[128];
-        sprintf(buf_op, "%s = %s <= %s", t, $1->place, $3->place);
-        char *c1 = concat3($1->code, $3->code, buf_op);
-        $$->code  = c1;
-        $$->place = strdup(t);
-        free($1->code); free($1->place);
-        free($3->code); free($3->place);
-        free(t);
-    }
-  | term {
-        $$->code  = $1->code ? strdup($1->code) : strdup("");
-        $$->place = $1->place ? strdup($1->place) : NULL;
-        free($1->code);
-        free($1->place);
-    }
-;
+construct :     block
+		{
+			$$ = $1;
+		}
+		|
+		WHILE '(' bool ')' block
+		{
+			printf("Inside WHILE\n");
+			puts($5);
+			
+			b1 = $3;
+			s1 = $5;
 
-/*======================================================
-  term: 乘除運算
-======================================================*/
-term:
-    term MULT factor {
-        char *t = newTemp();
-        char buf_op[128];
-        sprintf(buf_op, "%s = %s * %s", t, $1->place, $3->place);
-        char *c1 = concat3($1->code, $3->code, buf_op);
-        $$->code  = c1;
-        $$->place = strdup(t);
-        free($1->code); free($1->place);
-        free($3->code); free($3->place);
-        free(t);
-    }
-  | term DIV factor {
-        char *t = newTemp();
-        char buf_op[128];
-        sprintf(buf_op, "%s = %s / %s", t, $1->place, $3->place);
-        char *c1 = concat3($1->code, $3->code, buf_op);
-        $$->code  = c1;
-        $$->place = strdup(t);
-        free($1->code); free($1->place);
-        free($3->code); free($3->place);
-        free(t);
-    }
-  | factor {
-        $$->code  = $1->code ? strdup($1->code) : strdup("");
-        $$->place = $1->place ? strdup($1->place) : NULL;
-        free($1->code);
-        free($1->place);
-    }
-;
+			begin = newLabel();
+			label = newLabel();
 
-/*======================================================
-  factor: 
-   - (expression)
-   - IDENTIFIER
-   - x++ / x-- / ++x / --x
-   - IDENTIFIER [ expression ]
-   - NUMBER / STRING_LITERAL / FLOAT
-======================================================*/
-factor:
-    LPAREN expression RPAREN {
-        $$->code  = $2->code ? strdup($2->code) : strdup("");
-        $$->place = $2->place ? strdup($2->place) : NULL;
-        free($2->code);
-        free($2->place);
-    }
-  | IDENTIFIER {
-        $$->code  = strdup("");
-        $$->place = strdup($1);
-    }
-  | IDENTIFIER INC {
-        /* x++: 先把 x 放到 t，再 x = x+1 */
-        char *t1 = newTemp();
-        char buf1[128], buf2[128];
-        sprintf(buf1, "%s = %s", t1, $1);
-        sprintf(buf2, "%s = %s + 1", $1, $1);
-        char *c1 = concatCode(buf1, buf2);
-        $$->code  = c1;
-        $$->place = strdup(t1);
-        free(t1);
-    }
-  | IDENTIFIER DEC {
-        /* x-- */
-        char *t1 = newTemp();
-        char buf1[128], buf2[128];
-        sprintf(buf1, "%s = %s", t1, $1);
-        sprintf(buf2, "%s = %s - 1", $1, $1);
-        char *c1 = concatCode(buf1, buf2);
-        $$->code  = c1;
-        $$->place = strdup(t1);
-        free(t1);
-    }
-  | INC IDENTIFIER {
-        /* ++x: x = x+1, 然後把 x 放到 t */
-        char *t1 = newTemp();
-        char buf1[128], buf2[128];
-        sprintf(buf1, "%s = %s + 1", $2, $2);
-        sprintf(buf2, "%s = %s", t1, $2);
-        char *c1 = concatCode(buf1, buf2);
-        $$->code  = c1;
-        $$->place = strdup(t1);
-        free(t1);
-    }
-  | DEC IDENTIFIER {
-        /* --x */
-        char *t1 = newTemp();
-        char buf1[128], buf2[128];
-        sprintf(buf1, "%s = %s - 1", $2, $2);
-        sprintf(buf2, "%s = %s", t1, $2);
-        char *c1 = concatCode(buf1, buf2);
-        $$->code  = c1;
-        $$->place = strdup(t1);
-        free(t1);
-    }
-  | IDENTIFIER LBRACKET expression RBRACKET {
-        /* arr[E] 簡單假設：t = arr [ index ] */
-        char *t1 = newTemp();
-        char buf[128];
-        sprintf(buf, "%s = %s [ %s ]", t1, $1, $3->place);
-        char *c1 = concatCode($3->code, buf);
-        $$->code  = c1;
-        $$->place = strdup(t1);
-        free($3->code);
-        free($3->place);
-        free(t1);
-    }
-  | NUMBER {
-        $$->code  = strdup("");
-        char buf[32];
-        /* 這兒改用 %d 來處理整數 */
-        sprintf(buf, "%d", $1);
-        $$->place = strdup(buf);
-    }
-  | STRING_LITERAL {
-        $$->code  = strdup("");
-        $$->place = strdup($1);
-        free($1);
-    }
-  | FLOAT {
-        $$->code  = strdup("");
-        char buf[32];
-        /* FLOAT 用 %g 處理浮點 */
-        sprintf(buf, "%g", $1);
-        $$->place = strdup(buf);
-    }
-;
+			check = strstr (b1,"TRUE");
+			
+			while(check!=NULL){
+				strncpy (check,label,strlen(label));
+				strncpy (check+strlen(label),"    ",(4-strlen(label)));
+				check = strstr (b1,"TRUE");
+				}
 
-/*======================================================
-  argument_list_opt: (empty) 或 argument_list
-  $$->place = 最後一個 argument 的 place；$$->code = 所有 args->code
-======================================================*/
-argument_list_opt:
-    /* empty */ {
-        $$->code  = strdup("");
-        $$->place = NULL;
-    }
-  | argument_list {
-        $$->code  = $1->code ? strdup($1->code) : strdup("");
-        $$->place = $1->place ? strdup($1->place) : NULL;
-        free($1->code);
-        free($1->place);
-    }
-;
+			check = strstr (b1,"FAIL");
+			
+			while(check!=NULL){
+				strncpy (check,"NEXT",4);
+				//strncpy (check+strlen(label),"    ",(4-strlen(label)));
+				check = strstr (b1,"FAIL");
+				}
 
-/*======================================================
-  argument_list: 多個 expression (右遞迴)
-  $$->place = 最後一個 expr->place；$$->code = 左 + 右
-======================================================*/
-argument_list:
-    expression {
-        $$->code  = $1->code ? strdup($1->code) : strdup("");
-        $$->place = $1->place ? strdup($1->place) : NULL;
-        free($1->code);
-        free($1->place);
-    }
-  | argument_list COMMA expression {
-        char *tmp = concatCode($1->code ? $1->code : "", $3->code ? $3->code : "");
-        free($1->code);
-        free($3->code);
-        $$->code  = tmp;
-        $$->place = strdup($3->place);
-        free($3->place);
-    }
-;
+			check = strstr (s1,"NEXT");
+			
+			while(check!=NULL){
+				strncpy (check,begin,strlen(begin));
+				strncpy (check+strlen(begin),"    ",(4-strlen(begin)));
+				check = strstr (s1,"NEXT");
+				}
 
-/*======================================================
-  array_initializer: 暫不做實作，只回傳空字串
-======================================================*/
-array_initializer:
-    LBRACE initializer_list RBRACE {
-        $$->code  = strdup("");
-        $$->place = NULL;
-    }
-;
+			ret = (char *)malloc(strlen(b1)+strlen(s1)+20);
+			ret[0] = 0;
+			strcat(ret,begin);
+			strcat(ret," : ");
+			strcat(ret,b1);
+			strcat(ret,"\n");
+			strcat(ret,label);
+			strcat(ret," : ");
+			strcat(ret,s1);
 
-/*======================================================
-  initializer_list: 暫不做實作，只串 expression
-  $$->place 回傳最後一個 expression 的 place
-======================================================*/
-initializer_list:
-    expression {
-        $$->code  = $1->code ? strdup($1->code) : strdup("");
-        $$->place = $1->place ? strdup($1->place) : NULL;
-        free($1->code);
-        free($1->place);
-    }
-  | initializer_list COMMA expression {
-        char *tmp = concatCode($1->code ? $1->code : "", $3->code ? $3->code : "");
-        free($1->code);
-        free($3->code);
-        $$->code  = tmp;
-        $$->place = strdup($3->place);
-        free($3->place);
-    }
-;
+			strcat(ret,"\n");
+			strcat(ret,"goto ");
+			strcat(ret,begin);
+			
+			printf("Final return from while\n");
+			puts(ret);
 
+			$$ = ret;
+	
+		}
+		|
+		IF '(' bool ')' block
+		{
+			printf("Inside IF\n");
+			
+			label = newLabel();
+			b1 = $3;
+
+			check = strstr (b1,"TRUE");
+			
+			while(check!=NULL){
+				strncpy (check,label,strlen(label));
+				strncpy (check+strlen(label),"    ",(4-strlen(label)));
+				check = strstr (b1,"TRUE");
+				}
+			
+			check = strstr (b1,"FAIL");
+			
+			while(check!=NULL){
+				strncpy (check,"NEXT",4);
+				//strncpy (check+strlen(label),"    ",(4-strlen(label)));
+				check = strstr (b1,"FAIL");
+				}
+
+			ret = (char *)malloc(strlen(b1)+strlen($5)+4);
+			ret[0] = 0;
+			strcat(ret,b1);
+			strcat(ret,"\n");
+			strcat(ret,label);
+			strcat(ret," : ");
+			strcat(ret,$5);
+			
+			puts(ret);
+			$$ = ret;
+		}
+		|
+		IF '(' bool ')' block ELSE block
+		{
+			printf("Inside if then else\n");
+
+			b1 = $3;
+			label = newLabel();
+
+			check = strstr (b1,"TRUE");
+			
+			while(check!=NULL){
+				strncpy (check,label,strlen(label));
+				strncpy (check+strlen(label),"    ",(4-strlen(label)));
+				check = strstr (b1,"TRUE");
+				}
+			
+
+			label2 = newLabel();
+			check = strstr (b1,"FAIL");
+
+			while(check!=NULL){
+				strncpy (check,label2,strlen(label2));
+				strncpy (check+strlen(label2),"    ",(4-strlen(label2)));
+				check = strstr (b1,"FAIL");
+				}
+
+			ret = (char *)malloc(strlen(b1)+strlen($5)+strlen($7)+20);
+			ret[0] = 0;
+			strcat(ret,b1);
+			strcat(ret,"\n");
+			strcat(ret,label);
+			strcat(ret," : ");
+			strcat(ret,$5);
+			strcat(ret,"\n");
+			strcat(ret,"goto NEXT");
+			strcat(ret,"\n");
+			strcat(ret,label2);
+			strcat(ret," : ");
+			strcat(ret,$7);
+			
+			puts(ret);
+
+			$$ = ret;
+	
+		}
+		;
+
+block: '{' list '}'
+        {
+            printf("Inside block\n");
+            $$ = $2;
+        }
+    | '{' construct '}'
+        {
+            $$ = $2;
+        }
+    ;
+	 
+
+
+list: stat
+        {
+            $$ = $1->code;
+        }
+    | construct
+        {
+            $$ = $1;
+        }
+    | list stat
+        {
+            ret = (char *)malloc(strlen($1)+strlen($2->code)+4);
+            ret[0] = 0;
+            strcat(ret,$1);
+            strcat(ret,"\n");
+            strcat(ret,$2->code);
+            printf("Inside list stat \n");
+            puts(ret);
+            $$ = ret;
+        }
+    | list construct
+        {
+            ret = (char *)malloc(strlen($1)+strlen($2)+4);
+            ret[0] = 0;
+            strcat(ret,$1);
+            strcat(ret,"\n");
+            strcat(ret,$2);
+            printf("Inside list construct \n");
+            puts(ret);
+            $$ = ret;
+        }
+    | list error '\n'
+        {
+            yyerrok;
+        }
+    ;
+
+stat:    ';'
+	 {
+		to_return_expr = (struct exprType *)malloc(sizeof(struct exprType));
+		to_return_expr->addr = (char *)malloc(20);
+		to_return_expr->addr = $1;
+		
+		to_return_expr->code = (char *)malloc(2);
+		to_return_expr->code[0] = 0;
+		
+		$$ = to_return_expr;
+	 }
+	 |
+	 expr ';'
+         {
+		$$ = $1;
+           
+         }
+	 |
+	 dec ';'
+         {
+		to_return_expr = (struct exprType *)malloc(sizeof(struct exprType));
+		to_return_expr->addr = (char *)malloc(20);
+		to_return_expr->addr = $1;
+		
+		to_return_expr->code = (char *)malloc(2);
+		to_return_expr->code[0] = 0;
+		
+		$$ = to_return_expr;
+           
+         }
+         |
+         text '=' expr ';'
+         {
+	    printf("Assignment statement \n");
+
+		to_return_expr = (struct exprType *)malloc(sizeof(struct exprType));
+		to_return_expr->addr = (char *)malloc(20);
+		to_return_expr->addr = newTemp();
+		
+		ret = (char *)malloc(20);
+		ret[0] = 0;
+
+		strcat(ret,$1);
+
+		strcat(ret,"=");
+		strcat(ret,$3->addr);
+		printf("RET  = \n");
+		puts(ret);
+
+		temp = (char *)malloc(strlen($3->code)+strlen(ret)+6);
+
+		temp[0] = 0;
+		
+		if ($3->code[0]!=0){
+			strcat(temp,$3->code);
+			strcat(temp,"\n");
+			}
+		strcat(temp,ret);
+		printf("TEMP = \n");
+
+		puts(temp);
+
+		to_return_expr->code = temp;
+
+           	$$ = to_return_expr;
+	    
+			
+		//printf(" %s = %s \n",$1,$3->addr);
+          
+	    
+         }
+	 |
+	 dec '=' expr ';'
+         {
+	    printf("Dec and Assignment statement \n");
+	    
+		to_return_expr = (struct exprType *)malloc(sizeof(struct exprType));
+		to_return_expr->addr = (char *)malloc(20);
+		to_return_expr->addr = newTemp();
+		
+		ret = (char *)malloc(20);
+		ret[0] = 0;
+
+		//strcat(ret,to_return_expr->addr);
+		
+		strcat(ret,$1);
+		strcat(ret,"=");
+		strcat(ret,$3->addr);
+		printf("RET  = \n");
+		puts(ret);
+
+		temp = (char *)malloc(strlen($1)+strlen($3->code)+strlen(ret)+6);
+
+		temp[0] = 0;
+		
+		if ($3->code[0]!=0){
+			strcat(temp,$3->code);
+			strcat(temp,"\n");
+			}
+		strcat(temp,ret);
+		printf("TEMP = \n");
+
+		puts(temp);
+
+		to_return_expr->code = temp;
+
+           	$$ = to_return_expr;
+			
+		//printf(" %s = %s \n",$1,$3->addr);
+          
+	    
+         }
+         ;
+
+dec : 		TYPES text 
+		{	
+			$$ = $2;
+		}
+		;
+
+bool : 	 	expr REL_OPT expr
+		{
+			printf("Inside rel opt\n");
+
+			temp = (char *)malloc(strlen($1->code)+strlen($3->code)+50);
+			temp[0] = 0;
+	
+			if($1->code[0]!=0){
+				strcat(temp,$1->code);
+				strcat(temp,"\n");
+				}
+			if($3->code[0]!=0){
+				strcat(temp,$3->code);
+				strcat(temp,"\n");
+				}
+
+			ret = (char *)malloc(50);
+			ret[0] = 0;
+			strcat(ret,"if(");
+			strcat(ret,$1->addr);
+			strcat(ret,$2);
+			strcat(ret,$3->addr);
+			strcat(ret,") goto TRUE \n goto FAIL");
+
+			strcat(temp,ret);
+
+			$$ = temp;
+		}
+		|
+		bool OR bool
+		{
+			printf("Inside OR\n");
+			
+			b1 = $1;
+			b2 = $3;
+
+			label = newLabel();
+
+			check = strstr (b1,"FAIL");
+			
+			while(check!=NULL){
+				strncpy (check,label,strlen(label));
+				strncpy (check+strlen(label),"    ",(4-strlen(label)));
+				check = strstr (b1,"FAIL");
+				}
+			
+			temp = (char *)malloc(strlen(b1)+strlen(b2)+10);
+			temp[0] = 0;
+
+			strcat(temp,b1);
+			strcat(temp,"\n");
+			strcat(temp,label);
+			strcat(temp," : ");
+			strcat(temp,b2);
+
+			$$ = temp;
+		}
+		|
+		bool AND bool
+		{
+			printf("Inside AND\n");
+
+			b1 = $1;
+			b2 = $3;
+
+			label = newLabel();
+
+			check = strstr (b1,"TRUE");
+			
+			while(check!=NULL){
+				strncpy (check,label,strlen(label));
+				strncpy (check+strlen(label),"    ",(4-strlen(label)));
+				check = strstr (b1,"TRUE");
+				}
+			
+			temp = (char *)malloc(strlen(b1)+strlen(b2)+10);
+			temp[0] = 0;
+
+			strcat(temp,b1);
+			strcat(temp,"\n");
+			strcat(temp,label);
+			strcat(temp," : ");
+			strcat(temp,b2);
+
+			$$ = temp;
+		}
+		|
+		NOT '(' bool ')'
+		{
+			printf("Inside NOT\n");
+			puts($3);
+
+			b1 = $3;
+
+			label = "TEFS";
+
+			check = strstr (b1,"TRUE");
+			
+			while(check!=NULL){
+				strncpy (check,label,strlen(label));
+				//strncpy (check+strlen(label),"    ",(4-strlen(label)));
+				check = strstr (b1,"TRUE");
+				}
+			
+			label = "TRUE";
+			check = strstr (b1,"FAIL");
+			
+			while(check!=NULL){
+				strncpy (check,label,strlen(label));
+				//strncpy (check+strlen(label),"    ",(4-strlen(label)));
+				check = strstr (b1,"FAIL");
+				}
+
+			label = "FAIL";
+			check = strstr (b1,"TEFS");
+			
+			while(check!=NULL){
+				strncpy (check,label,strlen(label));
+				//strncpy (check+strlen(label),"    ",(4-strlen(label)));
+				check = strstr (b1,"TEFS");
+				}
+			
+			$$ = b1;
+		}
+		|
+		'(' bool ')'
+		{
+			$$ = $2;
+		}
+		|
+		TRUE
+		{
+			printf("Inside TRUE\n");
+
+			ret = (char *)malloc(20);
+			ret[0] = 0;
+			strcat(ret,"\ngoto TRUE");
+			
+			$$ = ret;
+		}
+		|
+		FALSE
+		{
+			printf("Inside FALSE\n");
+			
+			printf("Inside TRUE\n");
+
+			ret = (char *)malloc(20);
+			ret[0] = 0;
+			strcat(ret,"\ngoto FAIL");
+			
+			$$ = ret;
+		}
+		;
+
+expr:    '(' expr ')'
+         {
+           $$ = $2;
+         }
+         |
+	 expr '^' expr
+         {
+		printf("Exponential : ");
+		
+		to_return_expr = (struct exprType *)malloc(sizeof(struct exprType));
+		to_return_expr->addr = (char *)malloc(20);
+		to_return_expr->addr = newTemp();
+		
+		ret = (char *)malloc(20);
+		ret[0] = 0;
+
+		strcat(ret,to_return_expr->addr);
+
+		strcat(ret,"=");
+		strcat(ret,$1->addr);
+		strcat(ret,"^");
+		strcat(ret,$3->addr);
+		printf("RET  = \n");
+		puts(ret);
+
+		temp = (char *)malloc(strlen($1->code)+strlen($3->code)+strlen(ret)+6);
+
+		temp[0] = 0;
+		
+		if ($1->code[0]!=0){
+			strcat(temp,$1->code);
+			strcat(temp,"\n");
+			}
+		if ($3->code[0]!=0){
+			strcat(temp,$3->code);
+			strcat(temp,"\n");
+			}
+		strcat(temp,ret);
+		printf("TEMP = \n");
+
+		puts(temp);
+
+		to_return_expr->code = temp;
+
+           	$$ = to_return_expr;
+	
+         }
+	 |
+         expr '*' expr
+         {
+
+           printf("Multiplication : ");
+	   	to_return_expr = (struct exprType *)malloc(sizeof(struct exprType));
+		to_return_expr->addr = (char *)malloc(20);
+		to_return_expr->addr = newTemp();
+		
+		ret = (char *)malloc(20);
+		ret[0] = 0;
+
+		strcat(ret,to_return_expr->addr);
+
+		strcat(ret,"=");
+		strcat(ret,$1->addr);
+		strcat(ret,"*");
+		strcat(ret,$3->addr);
+		printf("RET  = \n");
+		puts(ret);
+
+		temp = (char *)malloc(strlen($1->code)+strlen($3->code)+strlen(ret)+6);
+
+		temp[0] = 0;
+		
+		if ($1->code[0]!=0){
+			strcat(temp,$1->code);
+			strcat(temp,"\n");
+			}
+		if ($3->code[0]!=0){
+			strcat(temp,$3->code);
+			strcat(temp,"\n");
+			}
+		strcat(temp,ret);
+		printf("TEMP = \n");
+
+		puts(temp);
+
+		to_return_expr->code = temp;
+
+           	$$ = to_return_expr;
+           
+         }
+         |
+         expr '/' expr
+         {
+           printf("Division : ");
+	  	to_return_expr = (struct exprType *)malloc(sizeof(struct exprType));
+		to_return_expr->addr = (char *)malloc(20);
+		to_return_expr->addr = newTemp();
+		
+		ret = (char *)malloc(20);
+		ret[0] = 0;
+
+		strcat(ret,to_return_expr->addr);
+
+		strcat(ret,"=");
+		strcat(ret,$1->addr);
+		strcat(ret,"/");
+		strcat(ret,$3->addr);
+		printf("RET  = \n");
+		puts(ret);
+
+		temp = (char *)malloc(strlen($1->code)+strlen($3->code)+strlen(ret)+6);
+
+		temp[0] = 0;
+		
+		if ($1->code[0]!=0){
+			strcat(temp,$1->code);
+			strcat(temp,"\n");
+			}
+		if ($3->code[0]!=0){
+			strcat(temp,$3->code);
+			strcat(temp,"\n");
+			}
+		strcat(temp,ret);
+		printf("TEMP = \n");
+
+		puts(temp);
+
+		to_return_expr->code = temp;
+
+           	$$ = to_return_expr;
+	   
+         }
+         |
+         expr '%' expr
+         {
+           printf("Modulo Division : ");
+	   	to_return_expr = (struct exprType *)malloc(sizeof(struct exprType));
+		to_return_expr->addr = (char *)malloc(20);
+		to_return_expr->addr = newTemp();
+		
+		ret = (char *)malloc(20);
+		ret[0] = 0;
+
+		strcat(ret,to_return_expr->addr);
+
+		strcat(ret,"=");
+		strcat(ret,$1->addr);
+		strcat(ret,"%");
+		strcat(ret,$3->addr);
+		printf("RET  = \n");
+		puts(ret);
+
+		temp = (char *)malloc(strlen($1->code)+strlen($3->code)+strlen(ret)+6);
+
+		temp[0] = 0;
+		
+		if ($1->code[0]!=0){
+			strcat(temp,$1->code);
+			strcat(temp,"\n");
+			}
+		if ($3->code[0]!=0){
+			strcat(temp,$3->code);
+			strcat(temp,"\n");
+			}
+		strcat(temp,ret);
+		printf("TEMP = \n");
+
+		puts(temp);
+
+		to_return_expr->code = temp;
+
+           	$$ = to_return_expr;
+         }
+         |
+         expr '+' expr
+         {
+           printf("Addition : ");
+	   	to_return_expr = (struct exprType *)malloc(sizeof(struct exprType));
+		to_return_expr->addr = (char *)malloc(20);
+		to_return_expr->addr = newTemp();
+
+		ret = (char *)malloc(20);
+		ret[0] = 0;
+
+		strcat(ret,to_return_expr->addr);
+
+		strcat(ret,"=");
+		strcat(ret,$1->addr);
+		strcat(ret,"+");
+		strcat(ret,$3->addr);
+		printf("RET  = \n");
+		puts(ret);
+
+		temp = (char *)malloc(strlen($1->code)+strlen($3->code)+strlen(ret)+6);
+
+		temp[0] = 0;
+		
+		if ($1->code[0]!=0){
+			strcat(temp,$1->code);
+			strcat(temp,"\n");
+			}
+		if ($3->code[0]!=0){
+			strcat(temp,$3->code);
+			strcat(temp,"\n");
+			}
+		strcat(temp,ret);
+		printf("TEMP = \n");
+
+		puts(temp);
+
+		to_return_expr->code = temp;
+
+           	$$ = to_return_expr;
+         }
+         |
+         expr '-' expr
+         {
+	   printf("Subtraction : ");
+           	to_return_expr = (struct exprType *)malloc(sizeof(struct exprType));
+		to_return_expr->addr = (char *)malloc(20);
+		to_return_expr->addr = newTemp();
+
+		ret = (char *)malloc(20);
+		ret[0] = 0;
+
+		strcat(ret,to_return_expr->addr);
+
+		strcat(ret,"=");
+		strcat(ret,$1->addr);
+		strcat(ret,"-");
+		strcat(ret,$3->addr);
+		printf("RET  = \n");
+		puts(ret);
+
+		temp = (char *)malloc(strlen($1->code)+strlen($3->code)+strlen(ret)+6);
+
+		temp[0] = 0;
+		
+		if ($1->code[0]!=0){
+			strcat(temp,$1->code);
+			strcat(temp,"\n");
+			}
+		if ($3->code[0]!=0){
+			strcat(temp,$3->code);
+			strcat(temp,"\n");
+			}
+		strcat(temp,ret);
+		printf("TEMP = \n");
+
+		puts(temp);
+		
+		to_return_expr->code = temp;
+
+           	$$ = to_return_expr;
+		
+         }
+         |
+	 text {
+		printf("Inside text\n");
+		to_return_expr = (struct exprType *)malloc(sizeof(struct exprType));
+		to_return_expr->addr = (char *)malloc(20);
+		to_return_expr->addr = $1;
+
+		to_return_expr->code = (char *)malloc(2);
+		to_return_expr->code[0] = 0;
+
+		$$ = to_return_expr;}
+         |
+         number {
+		printf("Inside Number\n");
+		to_return_expr = (struct exprType *)malloc(sizeof(struct exprType));
+		to_return_expr->addr = (char *)malloc(20);
+		to_return_expr->addr = $1;
+		
+		to_return_expr->code = (char *)malloc(2);
+		to_return_expr->code[0] = 0;
+		
+		$$ = to_return_expr;}
+         ;
+
+text: 	ID
+         {
+		printf("Inside Identifier : %s\n",$1);
+           	$$ = $1;
+         }
+	  ;
+
+number:  DIGIT
+         {
+		printf("Inside DIGIT : %d\n",$1);
+		var = (char *)malloc(20);
+           	snprintf(var, 10,"%d",$1);
+		$$ = var;
+           
+         } 
+	 |
+         FLOAT
+         {
+		printf("Inside FLOAT : %f\n",$1);
+		var = (char *)malloc(20);
+           	snprintf(var, 10,"%f",$1);
+		$$ = var;
+           
+         } 
+	;
+	
 %%
 
-/*======================================================
-  錯誤處理
-======================================================*/
-void yyerror(const char *s) {
-    fprintf(stderr, "❌ 語法錯誤：%s 在第 %d 行\n", s, yylineno);
+extern int yylex();
+extern int yyparse();
+extern FILE *yyin;
+
+int main() {
+	// open a file handle to a particular file:
+	FILE *myfile = fopen("test.c", "r");
+	// make sure it is valid:
+	if (!myfile) {
+		printf("I can't open a.snazzle.file!");
+		return -1;
+	}
+	// set lex to read from it instead of defaulting to STDIN:
+	yyin = myfile;
+	
+	// parse through the input until there is no more:
+	do {
+		yyparse();
+	} while (!feof(yyin));
+	return 0;
 }
 
-int main(int argc, char **argv) {
-    yyparse();
-    return 0;
+void yyerror(const char *s) {
+	printf("EEK, parse error!  Message: ");
+	puts(s);
+	//printf("\n");
+	// might as well halt now:
+	exit(-1);
 }
